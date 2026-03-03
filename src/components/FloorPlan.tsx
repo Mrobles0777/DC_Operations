@@ -1,0 +1,393 @@
+import { useRef, useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { ZoomIn, ZoomOut, Maximize2, X, Trash2, Save } from 'lucide-react'
+import { RackAsset, Device, U_TOTAL } from '../utils/excelUtils'
+
+interface Room {
+    width: number
+    height: number
+    name: string
+}
+
+interface FloorPlanProps {
+    assets: RackAsset[]
+    room: Room
+    onSelectRack?: (rack: RackAsset) => void
+    selectedRackId?: string | null
+    onSaveChanges?: (rackId: string, devices: Device[]) => void
+}
+
+export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveChanges }: FloorPlanProps) => {
+    const svgRef = useRef<SVGSVGElement>(null)
+    const [zoom, setZoom] = useState(1)
+    const [offset, setOffset] = useState({ x: 0, y: 0 })
+    const [hoveredAsset, setHoveredAsset] = useState<RackAsset | null>(null)
+    const [draggedDevice, setDraggedDevice] = useState<Device | null>(null)
+    const [rackDevices, setRackDevices] = useState<Device[]>([])
+    const [hasChanges, setHasChanges] = useState(false)
+
+    // System: 1 unit = 20 pixels for better visibility
+    const SCALE = 24 // Increased scale for labels
+    const AXIS_OFFSET = SCALE * 1.5
+
+    // Helper to convert number to letter (1=A, 2=B...)
+    const getLetter = (num: number) => {
+        let letter = ''
+        while (num > 0) {
+            let mod = (num - 1) % 26
+            letter = String.fromCharCode(65 + mod) + letter
+            num = Math.floor((num - mod) / 26)
+        }
+        return letter
+    }
+
+    // Get selected rack
+    const selectedRack = assets.find(a => a.id === selectedRackId)
+
+    // Update rack devices when selection changes
+    useEffect(() => {
+        if (selectedRack) {
+            setRackDevices([...selectedRack.devices])
+            setHasChanges(false)
+        } else {
+            setRackDevices([])
+            setHasChanges(false)
+        }
+    }, [selectedRack])
+
+    const handleDeviceDragStart = (device: Device) => {
+        setDraggedDevice(device)
+    }
+
+    const handleDeviceDrop = (targetU: number) => {
+        if (!draggedDevice || !selectedRack) return
+
+        // Remove device from old position
+        const updatedDevices = rackDevices.filter(d => d !== draggedDevice)
+
+        // Add device to new position
+        const movedDevice = { ...draggedDevice, u_position: targetU }
+        updatedDevices.push(movedDevice)
+
+        setRackDevices(updatedDevices)
+        setDraggedDevice(null)
+        setHasChanges(true)
+    }
+
+    const handleDeleteDevice = (device: Device) => {
+        if (!selectedRack) return
+
+        const updatedDevices = rackDevices.filter(d => d !== device)
+        setRackDevices(updatedDevices)
+        setHasChanges(true)
+    }
+
+    const handleSaveChanges = () => {
+        if (!selectedRack || !onSaveChanges) return
+
+        // Update the original rack's devices
+        selectedRack.devices = [...rackDevices]
+
+        // Call the parent callback
+        onSaveChanges(selectedRack.id, rackDevices)
+
+        setHasChanges(false)
+    }
+
+    return (
+        <div className="relative w-full h-[600px] flex gap-4">
+            {/* Floor Plan View */}
+            <div className={`relative ${selectedRack ? 'w-2/3' : 'w-full'} bg-slate-900/50 rounded-2xl overflow-hidden border border-white/5 shadow-inner transition-all duration-300`}>
+                {/* Controls */}
+                <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+                    <button
+                        onClick={() => setZoom(z => Math.min(3, z + 0.1))}
+                        className="p-2 glass-card hover:bg-white/10 text-white rounded-lg transition-colors"
+                        title="Zoom In"
+                    >
+                        <ZoomIn size={20} />
+                    </button>
+                    <button
+                        onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}
+                        className="p-2 glass-card hover:bg-white/10 text-white rounded-lg transition-colors"
+                        title="Zoom Out"
+                    >
+                        <ZoomOut size={20} />
+                    </button>
+                    <button
+                        onClick={() => { setZoom(1); setOffset({ x: 0, y: 0 }) }}
+                        className="p-2 glass-card hover:bg-white/10 text-white rounded-lg transition-colors"
+                        title="Reset View"
+                    >
+                        <Maximize2 size={20} />
+                    </button>
+                </div>
+
+                {/* Map Container */}
+                <div className="w-full h-full flex items-center justify-center">
+                    <motion.svg
+                        ref={svgRef}
+                        viewBox={`0 0 ${room.width * SCALE + AXIS_OFFSET} ${room.height * SCALE + AXIS_OFFSET}`}
+                        style={{
+                            width: '95%',
+                            height: '95%',
+                            scale: zoom,
+                            translateX: offset.x,
+                            translateY: offset.y
+                        }}
+                        className="drop-shadow-2xl"
+                    >
+                        <g transform={`translate(${AXIS_OFFSET}, 0)`}>
+                            {/* Room Base */}
+                            <rect
+                                width={room.width * SCALE}
+                                height={room.height * SCALE}
+                                fill="#0f172a"
+                                stroke="#1e293b"
+                                strokeWidth="4"
+                            />
+
+                            {/* Grid Lines & Labels */}
+                            {Array.from({ length: room.width + 1 }).map((_, i) => (
+                                <g key={`x-${i}`}>
+                                    <line
+                                        x1={i * SCALE} y1={0} x2={i * SCALE} y2={room.height * SCALE}
+                                        stroke="#334155" strokeWidth="0.5" opacity="0.2"
+                                    />
+                                    {i < room.width && (
+                                        <text
+                                            x={i * SCALE + SCALE / 2} y={room.height * SCALE + 12}
+                                            textAnchor="middle" fill="#64748b" fontSize="6.5" fontWeight="bold"
+                                            className="font-mono"
+                                        >
+                                            {i + 1}
+                                        </text>
+                                    )}
+                                </g>
+                            ))}
+                            {Array.from({ length: room.height + 1 }).map((_, i) => (
+                                <g key={`z-${i}`}>
+                                    <line
+                                        x1={0} y1={i * SCALE} x2={room.width * SCALE} y2={i * SCALE}
+                                        stroke="#334155" strokeWidth="0.5" opacity="0.2"
+                                    />
+                                    {i < room.height && (
+                                        <text
+                                            x={-10} y={i * SCALE + SCALE / 2}
+                                            textAnchor="end" fill="#64748b" fontSize="6.5" fontWeight="bold"
+                                            dominantBaseline="middle"
+                                            className="font-mono"
+                                        >
+                                            {getLetter(room.height - i)}
+                                        </text>
+                                    )}
+                                </g>
+                            ))}
+
+                            {/* Assets (Racks) */}
+                            {assets.map((asset) => {
+                                const isSelected = selectedRackId === asset.id;
+                                // pos_z in data matches the letter index (1=A, etc)
+                                // In our SVG, y=0 is top (last letter), y=height is bottom (A)
+                                // So Z=1 should be at row index room.height-1
+                                const gridY = (room.height - asset.pos_z) * SCALE;
+
+                                return (
+                                    <g
+                                        key={asset.id}
+                                        onMouseEnter={() => setHoveredAsset(asset)}
+                                        onMouseLeave={() => setHoveredAsset(null)}
+                                        onClick={() => onSelectRack?.(asset)}
+                                        className="cursor-pointer group"
+                                    >
+                                        <motion.rect
+                                            initial={false}
+                                            animate={{
+                                                scale: isSelected ? 1.1 : 1,
+                                                strokeWidth: isSelected ? 2 : 0
+                                            }}
+                                            x={(asset.pos_x - 1) * SCALE + (SCALE * 0.1)}
+                                            y={gridY + (SCALE * 0.1)}
+                                            width={SCALE * 0.8}
+                                            height={SCALE * 0.8}
+                                            fill={isSelected ? '#3b82f6' : '#1e293b'}
+                                            stroke="#60a5fa"
+                                            className="transition-colors duration-300 shadow-lg"
+                                            rx="2"
+                                        />
+                                        <text
+                                            x={(asset.pos_x - 1) * SCALE + (SCALE * 0.4)}
+                                            y={gridY + (SCALE * 0.55)}
+                                            textAnchor="middle"
+                                            fill={isSelected ? "white" : "#475569"}
+                                            fontSize="5"
+                                            className="font-mono font-bold pointer-events-none"
+                                        >
+                                            {asset.tag_id}
+                                        </text>
+                                    </g>
+                                )
+                            })}
+                        </g>
+                    </motion.svg>
+                </div>
+
+                {/* Selection/Hover Details Overlay */}
+                {(hoveredAsset || selectedRackId) && (
+                    <div className="absolute bottom-4 right-4 glass-card p-4 min-w-[200px] pointer-events-none">
+                        <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Activo Seleccionado</p>
+                        <p className="text-white font-bold">{(hoveredAsset || assets.find(a => a.id === selectedRackId))?.tag_id}</p>
+                        <p className="text-slate-400 text-xs mt-1">
+                            Posición: {(hoveredAsset || assets.find(a => a.id === selectedRackId))?.pos_x}, {(hoveredAsset || assets.find(a => a.id === selectedRackId))?.pos_z}
+                        </p>
+                        <p className="text-blue-400 text-xs mt-2">
+                            {(hoveredAsset || assets.find(a => a.id === selectedRackId))?.devices.length} dispositivos montados
+                        </p>
+                        {((hoveredAsset || assets.find(a => a.id === selectedRackId))?.consumo !== undefined) && (
+                            <div className="mt-3 pt-3 border-t border-white/5">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[10px] text-slate-500 uppercase">Consumo</span>
+                                    <span className="text-[10px] font-bold text-blue-400">{(hoveredAsset || assets.find(a => a.id === selectedRackId))?.consumo} KW</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Legend */}
+                <div className="absolute bottom-4 left-4 glass-card p-4 text-[10px] flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-sm"></div>
+                        <span className="text-slate-300 uppercase letter-spacing-wider">Rack Seleccionado</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-slate-800 border border-slate-700 rounded-sm"></div>
+                        <span className="text-slate-300 uppercase letter-spacing-wider">Rack Standby</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Editable Rack Layout Panel */}
+            {selectedRack && (
+                <motion.div
+                    initial={{ x: 300, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: 300, opacity: 0 }}
+                    className="w-1/3 glass-card border-white/5 rounded-2xl p-6 overflow-auto"
+                >
+                    {/* Header */}
+                    <div className="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                Layout Frontal: {selectedRack.tag_id}
+                            </h3>
+                            <p className="text-slate-400 text-xs mt-1">Arrastra para mover • Click para eliminar</p>
+                        </div>
+                        <button
+                            onClick={() => onSelectRack?.(selectedRack)}
+                            className="p-2 hover:bg-white/5 text-slate-400 hover:text-white rounded-lg transition-colors"
+                        >
+                            <X size={20} />
+                        </button>
+                    </div>
+
+                    {/* Rack Visual */}
+                    <div className="relative bg-slate-950/50 rounded-xl p-4 border border-white/5">
+                        {/* U Units */}
+                        <div className="flex gap-2">
+                            {/* U Labels */}
+                            <div className="flex flex-col-reverse gap-0.5">
+                                {Array.from({ length: U_TOTAL }).map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className="h-6 flex items-center justify-center text-[8px] text-slate-500 font-mono w-8"
+                                    >
+                                        U{i + 1}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Rack Slots */}
+                            <div className="flex-1 flex flex-col-reverse gap-0.5 relative">
+                                {Array.from({ length: U_TOTAL }).map((_, uIndex) => {
+                                    const uPosition = uIndex + 1
+                                    const deviceAtU = rackDevices.find(d => d.u_position === uPosition)
+
+                                    return (
+                                        <div
+                                            key={uIndex}
+                                            onDragOver={(e) => e.preventDefault()}
+                                            onDrop={() => handleDeviceDrop(uPosition)}
+                                            className={`h-6 rounded border transition-all ${deviceAtU
+                                                ? 'bg-blue-600/20 border-blue-500/50'
+                                                : 'bg-slate-800/30 border-slate-700/30 hover:border-blue-500/30'
+                                                }`}
+                                        >
+                                            {deviceAtU && (
+                                                <div
+                                                    draggable
+                                                    onDragStart={() => handleDeviceDragStart(deviceAtU)}
+                                                    className="h-full px-2 flex items-center justify-between group relative"
+                                                >
+                                                    <span className="text-[9px] text-blue-300 font-mono truncate flex-1 cursor-move">
+                                                        {deviceAtU.type || 'Device'}
+                                                    </span>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteDevice(deviceAtU);
+                                                        }}
+                                                        onMouseDown={(e) => e.stopPropagation()}
+                                                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/30 bg-red-500/20 rounded transition-all cursor-pointer z-10"
+                                                        title="Eliminar dispositivo"
+                                                    >
+                                                        <Trash2 size={12} className="text-red-400" />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="mt-4 pt-4 border-t border-white/5 grid grid-cols-2 gap-3">
+                            <div>
+                                <p className="text-[9px] text-slate-500 uppercase">Dispositivos</p>
+                                <p className="text-sm font-bold text-white">{rackDevices.length}</p>
+                            </div>
+                            <div>
+                                <p className="text-[9px] text-slate-500 uppercase">UR Usados</p>
+                                <p className="text-sm font-bold text-blue-400">
+                                    {rackDevices.reduce((acc, d) => acc + (d.u_height || 1), 0)} / {U_TOTAL}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-[9px] text-slate-500 uppercase">Estado</p>
+                                <p className="text-sm font-bold text-green-400">{selectedRack.estado || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <p className="text-[9px] text-slate-500 uppercase">Consumo</p>
+                                <p className="text-sm font-bold text-yellow-400">{selectedRack.consumo?.toFixed(2) || '0.00'} KW</p>
+                            </div>
+                        </div>
+
+                        {/* Save Button */}
+                        <button
+                            onClick={handleSaveChanges}
+                            disabled={!hasChanges}
+                            className={`mt-4 w-full py-3 px-4 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 ${hasChanges
+                                ? 'bg-blue-600 hover:bg-blue-500 text-white cursor-pointer shadow-lg shadow-blue-500/20'
+                                : 'bg-slate-800/50 text-slate-600 cursor-not-allowed'
+                                }`}
+                        >
+                            <Save size={16} />
+                            {hasChanges ? 'Guardar Cambios' : 'Sin Cambios'}
+                        </button>
+                    </div>
+                </motion.div>
+            )}
+        </div>
+    )
+}

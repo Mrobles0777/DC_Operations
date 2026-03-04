@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Server, Zap, Activity, Shield, Box, User, Hash, HardDrive, AlertCircle } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { RackAsset } from '../utils/excelUtils'
 
 interface RackLayoutProps {
@@ -13,8 +13,39 @@ interface RackLayoutProps {
 export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: RackLayoutProps) => {
     const [hoveredDeviceId, setHoveredDeviceId] = useState<string | null>(null)
 
+    // Auto-Positioning Engine: Ensures ALL devices render even if Excel lacks U-positions
+    const positionedDevices = useMemo(() => {
+        const occupied = new Set<number>();
+        const devices = [...rack.devices];
+
+        // 1. Register explicitly positioned devices
+        devices.forEach(d => {
+            if (d.u_position) {
+                for (let i = 0; i < (d.u_height || 1); i++) {
+                    occupied.add(d.u_position + i);
+                }
+            }
+        });
+
+        // 2. Auto-assign positions to floating devices
+        let availableU = 1;
+        return devices.map(dev => {
+            if (!dev.u_position) {
+                while (occupied.has(availableU)) {
+                    availableU++;
+                }
+                const assignedU = availableU;
+                for (let i = 0; i < (dev.u_height || 1); i++) {
+                    occupied.add(assignedU + i);
+                }
+                return { ...dev, u_position: assignedU };
+            }
+            return dev;
+        });
+    }, [rack.devices]);
+
     // Sort devices by U position (descending for display)
-    const sortedDevices = [...rack.devices].sort((a, b) => (b.u_position || 0) - (a.u_position || 0))
+    const sortedDevices = [...positionedDevices].sort((a, b) => (b.u_position || 0) - (a.u_position || 0))
 
     const getStatusColor = () => {
         const hasAlarms = (rack.alarm_hardware === 1) || (rack.alarm_ventilador === 1) || (rack.alarm_fuente === 1) || (rack.alarm_hdd === 1);
@@ -86,7 +117,7 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
 
                         {/* Dynamic Height Calculator */}
                         {(() => {
-                            const maxPos = rack.devices.reduce((max, d) => Math.max(max, (d.u_position || 0) + (d.u_height || 1) - 1), 42);
+                            const maxPos = positionedDevices.reduce((max: number, d: any) => Math.max(max, (d.u_position || 0) + (d.u_height || 1) - 1), 42);
                             const totalU = Math.max(42, maxPos);
 
                             return (
@@ -113,11 +144,11 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                                     {Array.from({ length: totalU }).map((_, i) => {
                                         const uNumber = totalU - i;
                                         const occupiesU = (dev: any) => {
-                                            const start = dev.u_position || 0;
+                                            const start = dev.u_position || 1;
                                             const end = start + (dev.u_height || 1) - 1;
                                             return uNumber >= start && uNumber <= end;
                                         };
-                                        const deviceAtU = rack.devices.find(occupiesU);
+                                        const deviceAtU = positionedDevices.find(occupiesU);
                                         const isTopMostUnit = deviceAtU && (deviceAtU.u_position! + (deviceAtU.u_height || 1) - 1) === uNumber;
                                         const isHovered = deviceAtU && hoveredDeviceId === deviceAtU.id;
 

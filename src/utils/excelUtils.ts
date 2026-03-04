@@ -123,7 +123,7 @@ export const parseAssetExcel = async (file: File): Promise<RackAsset[]> => {
                             propietario: String(row['L'] || '').trim(),
                             pos_x: inferredCoords ? inferredCoords.x : (Object.keys(racksMap).length % 20) * 2 + 1,
                             pos_z: inferredCoords ? inferredCoords.z : Math.floor(Object.keys(racksMap).length / 20) * 3 + 1,
-                            consumo: isRackHeader ? (safeParseNumber(row['AD']) || 0) / 1000 : 0,
+                            consumo: isRackHeader ? (safeParseNumber(row['AD']) || 0) : 0,
                             alarm_hardware: isRackHeader ? safeParseAlarm(row['R']) : undefined,
                             alarm_ventilador: isRackHeader ? safeParseAlarm(row['S']) : undefined,
                             alarm_fuente: isRackHeader ? safeParseAlarm(row['T']) : undefined,
@@ -158,13 +158,13 @@ export const parseAssetExcel = async (file: File): Promise<RackAsset[]> => {
 
                             // Sum to rack total if we just added a device with watts - Convert Watts to KW
                             if (deviceWatts) {
-                                racksMap[rackKey].consumo = (racksMap[rackKey].consumo || 0) + (deviceWatts / 1000);
+                                racksMap[rackKey].consumo = (racksMap[rackKey].consumo || 0) + (deviceWatts);
                             }
                         } else if (isRackHeader) {
                             // Update header info if multiple rack rows exist for same ID
                             if (marca) racksMap[rackKey].fabricante = marca;
                             if (modelo) racksMap[rackKey].modelo = modelo;
-                            if (deviceWatts) racksMap[rackKey].consumo = deviceWatts / 1000;
+                            if (deviceWatts) racksMap[rackKey].consumo = deviceWatts;
                         }
                     }
                 });

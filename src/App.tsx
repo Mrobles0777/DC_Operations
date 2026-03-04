@@ -153,7 +153,7 @@ function App() {
 
         return {
             totalRacks,
-            totalWatts: totalConsumption / 1000, // Convert to KW as per user request
+            totalWatts: totalConsumption, // Used as KW blindly per user request
             totalConsumption,
             usagePercent: usagePercent.toFixed(1),
             freePercent: freePercent.toFixed(1),

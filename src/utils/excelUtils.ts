@@ -33,6 +33,10 @@ export interface RackAsset {
     estado?: string;
     consumo?: number;
     propietario?: string;
+    alarm_hardware?: number;
+    alarm_ventilador?: number;
+    alarm_fuente?: number;
+    alarm_hdd?: number;
     devices: Device[];
 }
 
@@ -44,53 +48,29 @@ const safeParseNumber = (val: any): number | undefined => {
     return isNaN(num) ? undefined : num;
 };
 
-// Helper mapping for common column names in different languages/formats
-const COLUMN_MAP: Record<string, string[]> = {
-    sala: ['SALA', 'Room', 'Ubication'],
-    sitio: ['SITIO', 'Site', 'Location Name'],
-    rack: ['Rack', 'ID RACK', 'TAG ID', 'Rack Name', 'Coordenada\r\nNuevo ID', 'Nombre Rack Anterior', 'TAG', 'Bastidor', 'Rack Solución'],
-    coordenada: ['Coordenada', 'Location'],
-    piso: ['PISO', 'Floor'],
-    tipo: ['TIPO', 'TYPE', 'Tipo de Equipo', 'Device Type'],
-    marca: ['MARCA', 'FABRICANTE', 'BRAND', 'Manufacturer', 'Vendor'],
-    modelo: ['MODELO', 'MODEL', 'Modelo'],
-    serie: ['SERIE', 'S/N', 'SN', 'Número de Serie', 'Serial'],
-    pos_u: ['P.U', 'Posicion U', 'U Position', 'U-Pos', 'Ubicación en Rack'],
-    altura: ['ALTURA', 'HEIGHT', 'U Height', 'Size (U)', 'UR Utilizada'],
-    estado: ['ESTADO', 'STATUS', 'Estado', 'Estado de Rack'],
-    watts: ['WATTS', 'Power', 'Consumo', 'Potencia Consumida (WATTS)'],
-    ip: ['IP', 'IP GESTION', 'Management IP', 'IP Address'],
-    contrato: ['CONTRATO', 'Contract'],
-    propietario: ['PROPIETARIO', 'OWNER', 'Cliente', 'Customer'],
-    fecha_inst: ['FECHA INSTALACION', 'Install Date', 'Fecha'],
-    comentarios: ['COMENTARIOS', 'OBSERVACIONES', 'Notes', 'Comments', 'Comentario ALARMAS', 'Observación General']
+const safeParseAlarm = (val: any): number | undefined => {
+    if (val === undefined || val === null || String(val).trim() === '') return undefined;
+    const str = String(val).trim().toUpperCase();
+    if (str === 'SI') return 1;
+    if (str === 'NO') return 0;
+    return undefined;
 };
 
-const RACK_TERMS = ['RACK', 'BASTIDOR', 'RACK SOLUCIÓN', 'RACK SOLUCION', 'GABINETE', 'CABINET', 'STAND'];
 
-const getColumnValue = (row: any, keys: string[]) => {
-    const rowKeys = Object.keys(row);
+const parseCoords = (val: string) => {
+    const match = val.match(/([A-Z]+)-?(\d+)/i);
+    if (match) {
+        const rowPart = match[1].toUpperCase();
+        const colPart = parseInt(match[2]);
 
-    // First try exact matches and variations from COLUMN_MAP
-    for (const key of keys) {
-        const cleanSearchKey = key.replace(/[\r\n]/g, ' ').trim().toUpperCase();
-        const actualKey = rowKeys.find(k => {
-            const cleanRowKey = k.replace(/[\r\n]/g, ' ').trim().toUpperCase();
-            return cleanRowKey === cleanSearchKey;
-        });
-        if (actualKey !== undefined && row[actualKey] !== undefined) return row[actualKey];
+        let rowNum = 0;
+        for (let i = 0; i < rowPart.length; i++) {
+            rowNum = rowNum * 26 + (rowPart.charCodeAt(i) - 64);
+        }
+
+        return { x: colPart, z: rowNum };
     }
-
-    // Special check for Column C mentioned by the user (usually index 2)
-    // sheet_to_json doesn't give us indices by default, but we can try to find it
-    // if the keys are generic like __EMPTY_1
-    const colCKey = rowKeys[2]; // Index 2 is Column C
-    if (colCKey && keys.includes('Rack')) { // If we're looking for a rack identifier
-        const val = row[colCKey];
-        if (val) return val;
-    }
-
-    return undefined;
+    return null;
 };
 
 export const parseAssetExcel = async (file: File): Promise<RackAsset[]> => {
@@ -104,106 +84,92 @@ export const parseAssetExcel = async (file: File): Promise<RackAsset[]> => {
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
 
-                const jsonData = XLSX.utils.sheet_to_json(worksheet) as any[];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '', header: 'A' }) as any[];
+                console.log(`Excel parsed: ${jsonData.length} rows found.`);
+
                 const racksMap: Record<string, RackAsset> = {};
 
-                const parseCoords = (val: string) => {
-                    const match = val.match(/([A-Z]+)-?(\d+)/i);
-                    if (match) {
-                        const rowPart = match[1].toUpperCase();
-                        const colPart = parseInt(match[2]);
-
-                        let rowNum = 0;
-                        for (let i = 0; i < rowPart.length; i++) {
-                            rowNum = rowNum * 26 + (rowPart.charCodeAt(i) - 64);
-                        }
-
-                        return { x: colPart, z: rowNum };
-                    }
-                    return null;
-                };
-
                 jsonData.forEach((row, index) => {
-                    let rackIdRaw = getColumnValue(row, COLUMN_MAP.rack);
-                    const typeRaw = String(getColumnValue(row, COLUMN_MAP.tipo) || '').trim().toUpperCase();
+                    // Skip head (index 0 is usually headers like "SALA", "SITIO", "TIPO")
+                    if (index === 0) return;
 
-                    // Specific check for Column C if it contains rack-like terms
-                    const rowValues = Object.values(row);
-                    const colCValue = String(rowValues[2] || '').trim().toUpperCase();
+                    const site = String(row['A'] || '').trim() || 'SITIO GENERAL';
+                    const room = String(row['B'] || '').trim() || 'SALA GENERAL';
+                    const typeRaw = String(row['C'] || '').trim().toUpperCase();
+                    const rackIdRaw = String(row['I'] || '').trim();
 
-                    // If Column C or the type column contains rack terms, use it
-                    const isRackRow = RACK_TERMS.some(term => typeRaw.includes(term) || colCValue.includes(term));
+                    // If it's a "RACK" row according to Column C, we create/initialize the rack
+                    const isRackHeader = typeRaw.includes('RACK');
 
-                    // Fallback logic for rack identification
-                    if (!rackIdRaw || String(rackIdRaw).toUpperCase() === 'SIN TAG' || String(rackIdRaw).toUpperCase() === 'N/A') {
-                        rackIdRaw = getColumnValue(row, COLUMN_MAP.coordenada) || getColumnValue(row, COLUMN_MAP.serie);
+                    if (!rackIdRaw || rackIdRaw === '' || rackIdRaw.toUpperCase() === 'N/A' || rackIdRaw === 'Coordenada / Nuevo ID') {
+                        return;
                     }
 
-                    if (!rackIdRaw && !isRackRow) return;
+                    const rackId = rackIdRaw;
+                    // Composite key to handle multiple sites/rooms with same coordinates - Normalizing to Uppercase
+                    const rackKey = `${site.toUpperCase()}-${room.toUpperCase()}-${rackId.toUpperCase()}`;
 
-                    const rackId = String(rackIdRaw || colCValue || `RACK-${index}`).trim();
-                    const room = String(getColumnValue(row, COLUMN_MAP.sala) || '').trim();
-                    const site = String(getColumnValue(row, COLUMN_MAP.sitio) || '').trim();
+                    if (!racksMap[rackKey] && isRackHeader) {
+                        const inferredCoords = parseCoords(rackId);
 
-                    if (!racksMap[rackId]) {
-                        const coordVal = String(getColumnValue(row, COLUMN_MAP.coordenada) || '').trim();
-                        const inferredCoords = parseCoords(rackId) || parseCoords(coordVal);
-
-                        racksMap[rackId] = {
-                            id: `rack-${rackId}-${index}`,
+                        racksMap[rackKey] = {
+                            id: `rack-${rackKey}-${index}`,
                             tag_id: rackId,
                             type: 'rack',
                             sala: room,
                             sitio: site,
-                            piso: String(getColumnValue(row, COLUMN_MAP.piso) || '').trim(),
-                            estado: String(getColumnValue(row, COLUMN_MAP.estado) || 'Operativo'),
-                            propietario: String(getColumnValue(row, COLUMN_MAP.propietario) || ''),
-                            pos_x: inferredCoords ? inferredCoords.x : (Object.keys(racksMap).length % 10) * 3 + 1,
-                            pos_z: inferredCoords ? inferredCoords.z : Math.floor(Object.keys(racksMap).length / 10) * 4 + 1,
+                            piso: String(row['D'] || '').trim(),
+                            estado: String(row['P'] || 'Operativo'), // Status from Column P
+                            propietario: String(row['L'] || '').trim(),
+                            pos_x: inferredCoords ? inferredCoords.x : (Object.keys(racksMap).length % 20) * 2 + 1,
+                            pos_z: inferredCoords ? inferredCoords.z : Math.floor(Object.keys(racksMap).length / 20) * 3 + 1,
+                            consumo: safeParseNumber(row['AD']) || 0, // Initial from AD
+                            alarm_hardware: safeParseAlarm(row['R']),
+                            alarm_ventilador: safeParseAlarm(row['S']),
+                            alarm_fuente: safeParseAlarm(row['T']),
+                            alarm_hdd: safeParseAlarm(row['U']),
                             devices: []
                         };
-                    }
+                    } else if (racksMap[rackKey]) {
+                        // If the rack exists, we process additional info or devices
+                        const marca = String(row['E'] || '').trim(); // Marca seems to be E
+                        const modelo = String(row['F'] || '').trim(); // Modelo seems to be F
+                        const deviceWatts = safeParseNumber(row['AD']);
 
-                    const marca = getColumnValue(row, COLUMN_MAP.marca);
-                    const modelo = getColumnValue(row, COLUMN_MAP.modelo);
+                        if (!isRackHeader && (marca || modelo || row['G'])) {
+                            const device: Device = {
+                                id: `dev-${index}-${Math.random().toString(36).substr(2, 5)}`,
+                                type: typeRaw.toLowerCase() || 'equipo',
+                                modelo: modelo,
+                                fabricante: marca,
+                                serie: String(row['G'] || '').trim(), // SN seems to be G
+                                u_position: safeParseNumber(row['M']),
+                                u_height: safeParseNumber(row['O']) || 1, // Heights in O
+                                watts: deviceWatts, // Consumption in Watts from Column AD
+                                ip_gestion: String(row['V'] || '').trim(),
+                                contrato: String(row['W'] || '').trim(),
+                                owner: String(row['L'] || '').trim(),
+                                f_instalacion: String(row['N'] || '').trim(),
+                                comentarios: String(row['Y'] || '').trim()
+                            };
+                            racksMap[rackKey].devices.push(device);
 
-                    // If it's NOT a rack row definition, it's a device
-                    if (!isRackRow && (typeRaw !== '' || marca || modelo)) {
-                        const device: Device = {
-                            id: `dev-${index}`,
-                            type: typeRaw ? typeRaw.toLowerCase() : 'equipo',
-                            modelo: String(modelo || '').trim(),
-                            fabricante: String(marca || '').trim(),
-                            serie: String(getColumnValue(row, COLUMN_MAP.serie) || '').trim(),
-                            u_position: safeParseNumber(getColumnValue(row, COLUMN_MAP.pos_u)),
-                            u_height: safeParseNumber(getColumnValue(row, COLUMN_MAP.altura)) || 1,
-                            watts: safeParseNumber(getColumnValue(row, COLUMN_MAP.watts)),
-                            ip_gestion: String(getColumnValue(row, COLUMN_MAP.ip) || ''),
-                            contrato: String(getColumnValue(row, COLUMN_MAP.contrato) || ''),
-                            owner: String(getColumnValue(row, COLUMN_MAP.propietario) || ''),
-                            f_instalacion: String(getColumnValue(row, COLUMN_MAP.fecha_inst) || ''),
-                            comentarios: String(getColumnValue(row, COLUMN_MAP.comentarios) || '')
-                        };
-                        racksMap[rackId].devices.push(device);
-                    } else if (isRackRow) {
-                        // Update rack head info
-                        if (marca) racksMap[rackId].fabricante = String(marca).trim();
-                        if (modelo) racksMap[rackId].modelo = String(modelo).trim();
-                        if (getColumnValue(row, COLUMN_MAP.serie)) racksMap[rackId].serie = String(getColumnValue(row, COLUMN_MAP.serie)).trim();
-                    }
-                });
-
-                // Post-processing: Calculate rack consumption from devices if not provided
-                Object.values(racksMap).forEach(rack => {
-                    if (rack.consumo === undefined || rack.consumo === 0) {
-                        const totalWatts = rack.devices.reduce((sum, dev) => sum + (dev.watts || 0), 0);
-                        if (totalWatts > 0) {
-                            rack.consumo = totalWatts / 1000; // Convert to KW
+                            // Sum to rack total if we just added a device with watts
+                            if (deviceWatts) {
+                                racksMap[rackKey].consumo = (racksMap[rackKey].consumo || 0) + deviceWatts;
+                            }
+                        } else if (isRackHeader) {
+                            // Update header info if multiple rack rows exist for same ID
+                            if (marca) racksMap[rackKey].fabricante = marca;
+                            if (modelo) racksMap[rackKey].modelo = modelo;
+                            if (deviceWatts) racksMap[rackKey].consumo = deviceWatts;
                         }
                     }
                 });
 
-                resolve(Object.values(racksMap));
+                const finalRacks = Object.values(racksMap);
+                console.log(`Import complete: ${finalRacks.length} unique racks identified across sites.`);
+                resolve(finalRacks);
             } catch (error) {
                 reject(error);
             }

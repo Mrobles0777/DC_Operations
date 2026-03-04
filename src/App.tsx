@@ -1,9 +1,11 @@
-import { LayoutDashboard, Database, Map as MapIcon, Users, Settings, FileSpreadsheet, Plus, Trash2, Download, Box, Activity, Zap, X, Save, Check, AlertTriangle } from 'lucide-react'
+import { LayoutDashboard, Database, Map as MapIcon, Users, Settings, FileSpreadsheet, Trash2, Download, Box, Activity, Zap, X, Save, Check, AlertTriangle, Search } from 'lucide-react'
 import { useState, useRef, useMemo, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { FloorPlan } from './components/FloorPlan'
 import { ImportPreviewModal } from './components/ImportPreviewModal'
 import { RackLayout } from './components/RackLayout'
 import { UserManagement } from './components/UserManagement'
+import { StatusIndicators } from './components/StatusIndicators'
 import { parseAssetExcel, downloadTemplate, RackAsset, U_TOTAL } from './utils/excelUtils'
 
 const INITIAL_ASSETS: RackAsset[] = [
@@ -41,6 +43,11 @@ function App() {
     const [viewingSite, setViewingSite] = useState<string | null>(null)
     const [viewingSala, setViewingSala] = useState<string | null>(null)
     const [showClearAllConfirm, setShowClearAllConfirm] = useState(false)
+
+    // Dashboard local search & sort
+    const [dashboardSearch, setDashboardSearch] = useState('');
+    const [dashboardSort, setDashboardSort] = useState<'id' | 'usage' | 'power'>('id');
+    const [dashboardSelectedRack, setDashboardSelectedRack] = useState<RackAsset | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -116,13 +123,27 @@ function App() {
             return acc
         }, {})
 
+        const getAlarmPercent = (alarmKey: keyof RackAsset) => {
+            const assetsWithData = filteredAssets.filter(r => r[alarmKey] !== undefined);
+            if (assetsWithData.length === 0) return NaN;
+            const alarmsCount = assetsWithData.filter(r => r[alarmKey] === 1).length;
+            return (alarmsCount / assetsWithData.length) * 100;
+        };
+
         return {
             totalRacks,
+            totalWatts: totalConsumption / 1000, // Convert to KW as per user request
             totalConsumption,
             usagePercent: usagePercent.toFixed(1),
             freePercent: freePercent.toFixed(1),
             salaBreakdown: Object.values(salaGroups),
-            filteredAssets
+            filteredAssets,
+            alarms: {
+                hardware: getAlarmPercent('alarm_hardware'),
+                ventilador: getAlarmPercent('alarm_ventilador'),
+                fuente: getAlarmPercent('alarm_fuente'),
+                hdd: getAlarmPercent('alarm_hdd'),
+            }
         }
     }, [assets, selectedSite])
 
@@ -144,7 +165,7 @@ function App() {
         return {
             width: maxX + 2,
             height: maxZ + 2,
-            name: `SALA ${viewingSala} - ${viewingSite}`
+            name: `SALA ${viewingSala} - ${viewingSite} `
         };
     }, [assets, viewingSite, viewingSala]);
 
@@ -222,10 +243,10 @@ function App() {
                                     setViewingSala(null);
                                 }
                             }}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === item.id
+                            className={`flex items - center gap - 3 px - 4 py - 3 rounded - xl transition - all ${activeTab === item.id
                                 ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
                                 : 'hover:bg-white/5 text-slate-400 hover:text-white'
-                                }`}
+                                } `}
                         >
                             <item.icon size={20} />
                             <span className="font-medium">{item.label}</span>
@@ -242,57 +263,54 @@ function App() {
                         <p className="text-slate-400 mt-1">Gestión avanzada de activos de centro de datos</p>
                     </div>
 
-                    <div className="flex gap-3">
-                        {activeTab === 'inventory' && (
-                            <>
-                                <button
-                                    onClick={downloadTemplate}
-                                    className="px-4 py-2.5 glass-card bg-white/5 border-white/10 hover:bg-white/10 text-slate-300 hover:text-white transition-all flex items-center gap-2"
-                                >
-                                    <Download size={18} />
-                                    Plantilla
-                                </button>
-                                <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".xlsx, .xls" className="hidden" />
-                                <button
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="px-6 py-2.5 glass-card bg-blue-600/20 border-blue-500/30 hover:bg-blue-600/30 text-blue-400 font-semibold transition-all flex items-center gap-2"
-                                >
-                                    <FileSpreadsheet size={18} />
-                                    Importar
-                                </button>
-                                <button
-                                    onClick={handleSaveInventory}
-                                    disabled={isSaving}
-                                    className={`px-6 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg ${saveStatus === 'saved'
-                                        ? 'bg-green-600 text-white shadow-green-900/20'
-                                        : 'bg-white/5 glass-card border-white/10 hover:bg-white/10 text-white'
-                                        }`}
-                                >
-                                    {saveStatus === 'saving' ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            Guardando...
-                                        </>
-                                    ) : saveStatus === 'saved' ? (
-                                        <>
-                                            <Check size={18} />
-                                            ¡Guardado!
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Save size={18} className="text-blue-400" />
-                                            Guardar
-                                        </>
-                                    )}
-                                </button>
-                            </>
-                        )}
-                        {activeTab !== 'floorplan' && (
-                            <button className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl font-semibold shadow-lg shadow-blue-900/20 transition-all flex items-center gap-2">
-                                <Plus size={18} />
-                                Nuevo
-                            </button>
-                        )}
+                    <div className="flex items-center gap-8">
+                        {activeTab === 'dashboard' && <StatusIndicators alarms={stats.alarms} racksStats={{ total: stats.totalRacks, usage: stats.usagePercent }} />}
+                        <div className="flex gap-3">
+                            {activeTab === 'inventory' && (
+                                <>
+                                    <button
+                                        onClick={downloadTemplate}
+                                        className="px-4 py-2.5 glass-card bg-white/5 border-white/10 hover:bg-white/10 text-slate-300 hover:text-white transition-all flex items-center gap-2"
+                                    >
+                                        <Download size={18} />
+                                        Plantilla
+                                    </button>
+                                    <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".xlsx, .xls" className="hidden" />
+                                    <button
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="px-6 py-2.5 glass-card bg-blue-600/20 border-blue-500/30 hover:bg-blue-600/30 text-blue-400 font-semibold transition-all flex items-center gap-2"
+                                    >
+                                        <FileSpreadsheet size={18} />
+                                        Importar
+                                    </button>
+                                    <button
+                                        onClick={handleSaveInventory}
+                                        disabled={isSaving}
+                                        className={`px-6 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg ${saveStatus === 'saved'
+                                            ? 'bg-green-600 text-white shadow-green-900/20'
+                                            : 'bg-white/5 glass-card border-white/10 hover:bg-white/10 text-white'
+                                            }`}
+                                    >
+                                        {saveStatus === 'saving' ? (
+                                            <>
+                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                Guardando...
+                                            </>
+                                        ) : saveStatus === 'saved' ? (
+                                            <>
+                                                <Check size={18} />
+                                                ¡Guardado!
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save size={18} className="text-blue-400" />
+                                                Guardar
+                                            </>
+                                        )}
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </header>
 
@@ -321,12 +339,12 @@ function App() {
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                 {[
                                     { label: 'Total Racks', value: stats.totalRacks.toString(), icon: Box, color: 'blue' },
-                                    { label: 'Consumo Total', value: `${stats.totalConsumption.toFixed(2)} KW`, icon: Zap, color: 'blue' },
-                                    { label: 'Ocupación Global', value: `${stats.usagePercent}%`, icon: Activity, color: 'blue' },
+                                    { label: 'Consumo Total', value: `${stats.totalWatts.toFixed(2)} KW`, icon: Zap, color: 'blue' },
+                                    { label: 'Ocupación Global', value: `${stats.usagePercent}% `, icon: Activity, color: 'blue' },
                                     { label: 'UR Libres Site', value: `${(stats.totalRacks * U_TOTAL - stats.filteredAssets.reduce((a, r) => a + r.devices.reduce((d, dv) => d + dv.u_height!, 0), 0))} UR`, icon: Database, color: 'green' },
                                 ].map((stat) => (
                                     <div key={stat.label} className="p-6 glass-card border-white/5 flex items-center gap-4">
-                                        <div className={`w-12 h-12 bg-${stat.color}-600/20 rounded-xl flex items-center justify-center text-${stat.color}-400`}>
+                                        <div className={`w - 12 h - 12 bg - ${stat.color} -600 / 20 rounded - xl flex items - center justify - center text - ${stat.color} -400`}>
                                             <stat.icon size={24} />
                                         </div>
                                         <div>
@@ -392,100 +410,157 @@ function App() {
                                     </div>
                                 </div>
 
-                                {/* Rack Stack Chart Visual - Second in the middle */}
-                                <div className="glass-card p-6 border-white/5 w-[30%] overflow-auto">
-                                    <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3 uppercase text-[10px] tracking-widest group">
-                                        <Activity className="text-blue-500" size={16} />
-                                        Visualización de Pilas por Rack
-                                    </h3>
-                                    <div className="grid grid-cols-1 gap-4">
-                                        {assets.map((rack) => {
-                                            const usedU = rack.devices.reduce((acc, d) => acc + (d.u_height || 1), 0);
-                                            const uPercent = (usedU / U_TOTAL) * 100;
-                                            const statusColor = rack.estado?.toUpperCase() === 'OPERATIVO' ? '#22c55e' :
-                                                rack.estado?.toUpperCase() === 'VACIO' ? '#64748b' : '#eab308';
+                                {/* Interactive Capacity Monitor & Live Preview */}
+                                <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
+                                    {/* Left: Capacity Monitor */}
+                                    <div className="glass-card p-6 border-white/5 flex-[3] flex flex-col min-h-0 bg-slate-900/40">
+                                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                                            <div>
+                                                <h3 className="text-sm font-black text-white flex items-center gap-3 uppercase tracking-[0.3em]">
+                                                    <Activity className="text-blue-500" size={18} />
+                                                    Inventory Analytics
+                                                </h3>
+                                                <p className="text-[9px] text-slate-500 font-bold uppercase mt-1 tracking-widest opacity-60">Real-time status monitor per unit</p>
+                                            </div>
 
-                                            return (
-                                                <div
-                                                    key={rack.id}
-                                                    onClick={() => openRackDetail(rack)}
-                                                    className="bg-black/20 p-4 rounded-xl border border-white/5 hover:border-blue-500/30 transition-all cursor-pointer group"
+                                            <div className="flex items-center gap-3 w-full md:w-auto">
+                                                <div className="relative flex-1 md:w-56">
+                                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Quick Search..."
+                                                        value={dashboardSearch}
+                                                        onChange={(e) => setDashboardSearch(e.target.value)}
+                                                        className="w-full bg-black/40 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-xs text-white placeholder:text-slate-600 focus:border-blue-500/50 outline-none transition-all font-mono"
+                                                    />
+                                                </div>
+                                                <select
+                                                    value={dashboardSort}
+                                                    onChange={(e) => setDashboardSort(e.target.value as any)}
+                                                    className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-[10px] text-blue-400 font-black outline-none cursor-pointer hover:border-blue-500/50 transition-all uppercase tracking-tighter font-mono"
                                                 >
-                                                    <div className="flex justify-between items-center mb-1">
-                                                        <span className="font-mono font-bold text-blue-400 text-sm">{rack.tag_id}</span>
-                                                        <span className="text-[10px] text-slate-500">{(rack.consumo || 0).toFixed(2)} KW</span>
-                                                    </div>
-                                                    <div className="text-[9px] text-slate-600 mb-2 uppercase tracking-tighter font-bold">{rack.sitio} • {rack.sala}</div>
-                                                    {/* Stack Bar */}
-                                                    <div className="h-6 w-full bg-slate-800 rounded-md overflow-hidden flex relative">
-                                                        <div
-                                                            style={{ width: `${uPercent}%`, backgroundColor: statusColor }}
-                                                            className="h-full transition-all duration-500"
-                                                        />
-                                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                                            <span className="text-[9px] font-bold text-white drop-shadow-md">
-                                                                {usedU} / {U_TOTAL} UR
-                                                            </span>
+                                                    <option value="id">SORT: ID</option>
+                                                    <option value="usage">SORT: USAGE</option>
+                                                    <option value="power">SORT: LOAD</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 overflow-auto pr-2 custom-scrollbar pb-4 min-h-0 flex-1">
+                                            {stats.filteredAssets
+                                                .filter(r =>
+                                                    r.tag_id.toLowerCase().includes(dashboardSearch.toLowerCase()) ||
+                                                    (r.sala || '').toLowerCase().includes(dashboardSearch.toLowerCase()) ||
+                                                    (r.sitio || '').toLowerCase().includes(dashboardSearch.toLowerCase())
+                                                )
+                                                .sort((a, b) => {
+                                                    if (dashboardSort === 'usage') {
+                                                        const useA = a.devices.reduce((acc, d) => acc + (d.u_height || 1), 0);
+                                                        const useB = b.devices.reduce((acc, d) => acc + (d.u_height || 1), 0);
+                                                        return useB - useA;
+                                                    }
+                                                    if (dashboardSort === 'power') return (b.consumo || 0) - (a.consumo || 0);
+                                                    return a.tag_id.localeCompare(b.tag_id);
+                                                })
+                                                .map((rack) => {
+                                                    const usedU = rack.devices.reduce((acc, d) => acc + (d.u_height || 1), 0);
+                                                    const uPercent = (usedU / U_TOTAL) * 100;
+                                                    const statusColor = rack.estado?.toUpperCase() === 'OPERATIVO' ? 'from-emerald-500 to-emerald-700' :
+                                                        rack.estado?.toUpperCase() === 'VACIO' ? 'from-slate-600 to-slate-800' : 'from-yellow-400 to-orange-500';
+
+                                                    const isAlert = uPercent > 90 || rack.alarm_hardware === 1;
+                                                    const isSelected = dashboardSelectedRack?.id === rack.id;
+
+                                                    return (
+                                                        <motion.div
+                                                            key={rack.id}
+                                                            whileHover={{ y: -4, scale: 1.02 }}
+                                                            onClick={() => setDashboardSelectedRack(rack)}
+                                                            className={`group relative flex flex-col bg-slate-900 border ${isSelected ? 'border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]' : isAlert ? 'border-red-500/30' : 'border-white/5'} hover:border-blue-500/50 rounded-xl p-3 transition-all cursor-pointer overflow-hidden`}
+                                                        >
+                                                            {isAlert && <div className="absolute top-0 right-0 w-8 h-8 bg-red-500/10 rounded-bl-3xl flex items-start justify-end p-1"><AlertTriangle size={12} className="text-red-500 animate-pulse" /></div>}
+
+                                                            <div className="flex justify-between items-start mb-3">
+                                                                <div className="flex flex-col">
+                                                                    <span className={`text-[11px] font-black font-mono tracking-tighter ${isSelected ? 'text-blue-400' : 'text-white'} group-hover:text-blue-400 transition-colors`}>{rack.tag_id}</span>
+                                                                    <span className="text-[7px] text-slate-600 font-black uppercase tracking-tight">{rack.sala}</span>
+                                                                </div>
+                                                                <span className={`w-1.5 h-1.5 rounded-full ${rack.estado?.toUpperCase() === 'OPERATIVO' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.5)]'}`}></span>
+                                                            </div>
+
+                                                            <div className="flex-1 flex gap-2 items-end">
+                                                                {/* Modern Vertical Gauge */}
+                                                                <div className="w-2.5 h-16 bg-black/40 rounded-full border border-white/5 p-0.5 overflow-hidden flex flex-col-reverse relative shadow-inner">
+                                                                    <motion.div
+                                                                        initial={{ height: 0 }}
+                                                                        animate={{ height: `${uPercent}%` }}
+                                                                        className={`w-full rounded-full bg-gradient-to-t ${statusColor} shadow-lg`}
+                                                                    />
+                                                                </div>
+
+                                                                <div className="flex-1 flex flex-col justify-end">
+                                                                    <p className="text-[14px] font-black text-white leading-none font-mono">
+                                                                        {uPercent.toFixed(0)}<span className="text-[8px] text-blue-500 ml-0.5">%</span>
+                                                                    </p>
+                                                                    <p className="text-[7px] text-slate-600 font-black uppercase mt-1">OCCUPANCY</p>
+                                                                </div>
+                                                            </div>
+                                                        </motion.div>
+                                                    );
+                                                })}
+                                        </div>
+                                    </div>
+
+                                    {/* Right: Live Industrial Preview */}
+                                    <div className="glass-card p-6 border-white/5 w-full lg:w-[380px] flex flex-col min-h-0 bg-slate-900 shadow-2xl relative overflow-hidden group/preview">
+                                        {/* Background Decor */}
+                                        <div className="absolute inset-0 bg-gradient-to-b from-blue-600/[0.03] to-transparent pointer-events-none"></div>
+
+                                        <div className="flex justify-between items-center mb-6 relative z-10">
+                                            <h4 className="text-[10px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
+                                                <Box size={16} className="text-blue-500" />
+                                                Visual Digital Twin
+                                            </h4>
+                                            {dashboardSelectedRack && (
+                                                <button
+                                                    onClick={() => openRackDetail(dashboardSelectedRack)}
+                                                    className="p-2 hover:bg-white/5 rounded-lg text-blue-400 hover:text-blue-300 transition-colors"
+                                                    title="Open Detailed View"
+                                                >
+                                                    <Activity size={16} />
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10">
+                                            {dashboardSelectedRack ? (
+                                                <div className="h-full flex flex-col mt-2">
+                                                    <div className="mb-4 p-3 bg-black/40 rounded-xl border border-white/5 flex justify-between items-center">
+                                                        <div>
+                                                            <p className="text-[8px] text-slate-500 font-black uppercase tracking-widest">Active Selector</p>
+                                                            <p className="text-lg font-black text-white tracking-tighter uppercase font-mono">{dashboardSelectedRack.tag_id}</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-[8px] text-slate-500 font-black uppercase tracking-widest text-right">Site</p>
+                                                            <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">{dashboardSelectedRack.sitio}</p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex justify-between mt-2">
-                                                        <span className="text-[9px] uppercase font-bold text-slate-500 tracking-tighter">Estado: {rack.estado || 'N/A'}</span>
-                                                        <span className="text-[9px] font-bold text-blue-400">{uPercent.toFixed(0)}% Ocupado</span>
+                                                    <div className="flex-1 overflow-hidden scale-[0.9] origin-top">
+                                                        <RackLayout rack={dashboardSelectedRack} hideHeader={true} isCompact={true} />
                                                     </div>
                                                 </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                {/* Per-Rack Breakdown Table - Third on the right */}
-                                <div className="glass-card p-8 border-white/5 overflow-hidden flex flex-col flex-1">
-                                    <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
-                                        <Box className="text-blue-500" />
-                                        Estructura de Racks
-                                    </h3>
-                                    <div className="overflow-auto flex-1">
-                                        <table className="w-full text-left">
-                                            <thead className="text-slate-500 text-[10px] uppercase tracking-[0.2em]">
-                                                <tr className="border-b border-white/5">
-                                                    <th className="pb-4 px-4">Rack</th>
-                                                    <th className="pb-4 px-4">Estado</th>
-                                                    <th className="pb-4 px-4 text-right">Uso %</th>
-                                                    <th className="pb-4 px-4 text-right">UR Libres</th>
-                                                    <th className="pb-4 px-4 text-right">Consumo</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-white/5">
-                                                {stats.filteredAssets.map((rack) => {
-                                                    const usedU = rack.devices.reduce((acc, d) => acc + (d.u_height || 1), 0)
-                                                    const uPercent = ((usedU / U_TOTAL) * 100).toFixed(1)
-                                                    const availU = U_TOTAL - usedU
-                                                    return (
-                                                        <tr key={rack.id} className="hover:bg-white/5 transition-colors">
-                                                            <td className="py-4 px-4">
-                                                                <button
-                                                                    onClick={() => openRackDetail(rack)}
-                                                                    className="font-bold text-blue-400 hover:text-blue-300 font-mono underline decoration-blue-400/30"
-                                                                >
-                                                                    {rack.tag_id}
-                                                                </button>
-                                                            </td>
-                                                            <td className="py-4 px-4">
-                                                                <span className={`px-2 py-1 rounded-md text-[9px] uppercase font-bold ${rack.estado?.toUpperCase() === 'OPERATIVO' ? 'bg-green-500/20 text-green-400' :
-                                                                    rack.estado?.toUpperCase() === 'VACIO' ? 'bg-slate-500/20 text-slate-400' :
-                                                                        'bg-yellow-500/20 text-yellow-400'
-                                                                    }`}>
-                                                                    {rack.estado || 'N/A'}
-                                                                </span>
-                                                            </td>
-                                                            <td className="py-4 px-4 text-right text-blue-400 font-mono">{uPercent}%</td>
-                                                            <td className="py-4 px-4 text-right text-green-400 font-mono">{availU} UR</td>
-                                                            <td className="py-4 px-4 text-right text-slate-300 font-mono">{(rack.consumo || 0).toFixed(2)} KW</td>
-                                                        </tr>
-                                                    )
-                                                })}
-                                            </tbody>
-                                        </table>
+                                            ) : (
+                                                <div className="flex-1 flex flex-col items-center justify-center text-center p-10 space-y-4 opacity-30 group-hover/preview:opacity-50 transition-opacity">
+                                                    <div className="w-16 h-16 rounded-3xl border-2 border-dashed border-white/20 flex items-center justify-center">
+                                                        <Box size={32} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs font-black text-white uppercase tracking-widest">No Selection</p>
+                                                        <p className="text-[9px] text-slate-500 font-bold uppercase mt-1 leading-loose">Select a rack from the capacity monitor to initialize the digital twin projection</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -524,44 +599,51 @@ function App() {
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-white/5">
-                                                {assets.map((asset) => (
-                                                    <tr key={asset.id} className="hover:bg-white/5 transition-colors group">
-                                                        <td className="py-5 px-4 font-bold text-white font-mono">{asset.tag_id}</td>
-                                                        <td className="py-5 px-4 text-slate-400 font-bold text-xs">{asset.sitio || 'N/A'}</td>
-                                                        <td className="py-5 px-4 text-slate-400">{asset.fabricante}</td>
-                                                        <td className="py-5 px-4 text-slate-400">{asset.modelo}</td>
-                                                        <td className="py-5 px-4">
-                                                            <span className="px-3 py-1 bg-blue-600/10 text-blue-400 rounded-full text-xs font-semibold">
-                                                                {asset.devices.length} Units
-                                                            </span>
-                                                        </td>
-                                                        <td className="py-5 px-4">
-                                                            <div className="flex gap-2">
-                                                                <button onClick={() => openRackDetail(asset)} className="p-2 hover:bg-blue-600/20 text-blue-400 rounded-lg transition-all opacity-0 group-hover:opacity-100">
-                                                                    <Activity size={18} />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => { setAssetToDelete(asset); setShowDeleteConfirm(true); }}
-                                                                    className="p-2 hover:bg-red-600/20 text-red-500 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                                                                >
-                                                                    <Trash2 size={18} />
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                                {assets.map((asset) => {
+                                                    const isSelected = selectedRack?.id === asset.id;
+                                                    return (
+                                                        <tr
+                                                            key={asset.id}
+                                                            onClick={() => setSelectedRack(asset)}
+                                                            className={`transition-colors group cursor-pointer ${isSelected ? 'bg-blue-600/10 border-l-4 border-l-blue-500' : 'hover:bg-white/5 border-l-4 border-l-transparent'}`}
+                                                        >
+                                                            <td className={`py-5 px-4 font-bold font-mono ${isSelected ? 'text-blue-400' : 'text-white'}`}>{asset.tag_id}</td>
+                                                            <td className="py-5 px-4 text-slate-400 font-bold text-xs">{asset.sitio || 'N/A'}</td>
+                                                            <td className="py-5 px-4 text-slate-400">{asset.fabricante}</td>
+                                                            <td className="py-5 px-4 text-slate-400">{asset.modelo}</td>
+                                                            <td className="py-5 px-4">
+                                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${isSelected ? 'bg-blue-600/20 text-blue-300' : 'bg-blue-600/10 text-blue-400'}`}>
+                                                                    {asset.devices.length} Units
+                                                                </span>
+                                                            </td>
+                                                            <td className="py-5 px-4">
+                                                                <div className="flex gap-2">
+                                                                    <button
+                                                                        onClick={(e) => { e.stopPropagation(); setAssetToDelete(asset); setShowDeleteConfirm(true); }}
+                                                                        className="p-2 hover:bg-red-600/20 text-red-500 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                                    >
+                                                                        <Trash2 size={18} />
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
                                             </tbody>
                                         </table>
                                     </div>
                                 </section>
 
-                                <div className="flex-1 flex flex-col">
+                                <div className="flex-1 flex flex-col h-full overflow-hidden">
                                     {selectedRack ? (
-                                        <RackLayout rack={selectedRack} onClose={() => setSelectedRack(null)} />
+                                        <div className="h-full overflow-hidden">
+                                            <RackLayout rack={selectedRack} hideHeader={true} />
+                                        </div>
                                     ) : (
-                                        <div className="flex-1 glass-card border-white/5 flex flex-col items-center justify-center text-slate-500 border-dashed border-2">
-                                            <Box size={48} className="mb-4 opacity-20" />
-                                            <p className="font-medium">Seleccione un rack para ver su layout</p>
+                                        <div className="flex-1 glass-card border-white/5 flex flex-col items-center justify-center text-slate-500 border-dashed border-2 bg-slate-900/40">
+                                            <Box size={48} className="mb-4 opacity-10" />
+                                            <p className="font-black text-[10px] uppercase tracking-[0.3em]">Select a rack unit</p>
+                                            <p className="text-[9px] text-slate-600 uppercase mt-2 tracking-widest font-bold">To initialize the hardware registry map</p>
                                         </div>
                                     )}
                                 </div>
@@ -575,7 +657,7 @@ function App() {
                             <div className="flex items-center gap-3 mb-2">
                                 <button
                                     onClick={() => { setViewingSite(null); setViewingSala(null); setSelectedRack(null); }}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${!viewingSite ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                                    className={`px - 3 py - 1.5 rounded - lg text - xs font - bold transition - all ${!viewingSite ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-500 hover:text-white hover:bg-white/5'} `}
                                 >
                                     SITIOS
                                 </button>
@@ -584,7 +666,7 @@ function App() {
                                         <span className="text-slate-600">/</span>
                                         <button
                                             onClick={() => { setViewingSala(null); setSelectedRack(null); }}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${viewingSite && !viewingSala ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                                            className={`px - 3 py - 1.5 rounded - lg text - xs font - bold transition - all ${viewingSite && !viewingSala ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-500 hover:text-white hover:bg-white/5'} `}
                                         >
                                             {viewingSite}
                                         </button>
@@ -710,30 +792,31 @@ function App() {
             {
                 isRackModalOpen && selectedRack && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <div
-                            className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="absolute inset-0 bg-slate-950/90 backdrop-blur-xl"
                             onClick={() => setIsRackModalOpen(false)}
                         />
-                        <div className="relative w-full max-w-2xl max-h-[90vh] glass-card border-white/10 overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-200">
-                            <div className="flex justify-between items-center p-6 border-b border-white/5 bg-white/5">
-                                <div>
-                                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                        <Box className="text-blue-500" size={20} />
-                                        Detalle del Rack: {selectedRack.tag_id}
-                                    </h3>
-                                    <p className="text-slate-400 text-xs mt-1 uppercase tracking-widest">{selectedRack.sala} • {selectedRack.estado}</p>
-                                </div>
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            className="relative w-full max-w-7xl h-[85vh] glass-card border-white/10 shadow-2xl overflow-hidden flex flex-col"
+                        >
+                            {/* Modal Header Overlay */}
+                            <div className="absolute top-6 right-6 z-50">
                                 <button
                                     onClick={() => setIsRackModalOpen(false)}
-                                    className="p-2 hover:bg-white/5 text-slate-400 hover:text-white rounded-lg transition-colors"
+                                    className="p-3 bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-2xl transition-all border border-white/10 hover:border-red-500/30"
                                 >
                                     <X size={24} />
                                 </button>
                             </div>
-                            <div className="flex-1 overflow-auto p-8 bg-slate-900/30">
-                                <RackLayout rack={selectedRack} hideHeader />
+
+                            <div className="flex-1 overflow-auto custom-scrollbar">
+                                <RackLayout rack={selectedRack} />
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 )
             }
@@ -775,42 +858,44 @@ function App() {
                 )
             }
             {/* Clear All Confirmation Modal */}
-            {showClearAllConfirm && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-                    <div
-                        className="absolute inset-0 bg-slate-950/90 backdrop-blur-md"
-                        onClick={() => setShowClearAllConfirm(false)}
-                    />
-                    <div className="relative w-full max-w-md glass-card border-red-500/40 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-                        <div className="p-8 text-center">
-                            <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500 animate-pulse">
-                                <Trash2 size={32} />
-                            </div>
-                            <h3 className="text-2xl font-bold text-white mb-2 text-red-500">¡Acción Crítica!</h3>
-                            <p className="text-slate-400 text-sm mb-8">
-                                Estás a punto de borrar los <span className="text-white font-mono font-bold">{assets.length} activos</span> guardados.<br /><br />
-                                <span className="bg-red-500/10 text-red-400 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest">
-                                    Esta acción es irreversible
-                                </span>
-                            </p>
-                            <div className="flex gap-4">
-                                <button
-                                    onClick={() => setShowClearAllConfirm(false)}
-                                    className="flex-1 px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-semibold transition-all"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    onClick={handleClearAllInventory}
-                                    className="flex-1 px-6 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold transition-all shadow-lg shadow-red-600/20"
-                                >
-                                    Borrar Todo
-                                </button>
+            {
+                showClearAllConfirm && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                        <div
+                            className="absolute inset-0 bg-slate-950/90 backdrop-blur-md"
+                            onClick={() => setShowClearAllConfirm(false)}
+                        />
+                        <div className="relative w-full max-w-md glass-card border-red-500/40 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                            <div className="p-8 text-center">
+                                <div className="w-16 h-16 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500 animate-pulse">
+                                    <Trash2 size={32} />
+                                </div>
+                                <h3 className="text-2xl font-bold text-white mb-2 text-red-500">¡Acción Crítica!</h3>
+                                <p className="text-slate-400 text-sm mb-8">
+                                    Estás a punto de borrar los <span className="text-white font-mono font-bold">{assets.length} activos</span> guardados.<br /><br />
+                                    <span className="bg-red-500/10 text-red-400 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest">
+                                        Esta acción es irreversible
+                                    </span>
+                                </p>
+                                <div className="flex gap-4">
+                                    <button
+                                        onClick={() => setShowClearAllConfirm(false)}
+                                        className="flex-1 px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-semibold transition-all"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        onClick={handleClearAllInventory}
+                                        className="flex-1 px-6 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold transition-all shadow-lg shadow-red-600/20"
+                                    >
+                                        Borrar Todo
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
         </div >
     )
 }

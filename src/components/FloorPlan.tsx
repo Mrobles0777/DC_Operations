@@ -47,7 +47,35 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
     // Update rack devices when selection changes
     useEffect(() => {
         if (selectedRack) {
-            setRackDevices([...selectedRack.devices])
+            const occupied = new Set<number>();
+            const devices = [...selectedRack.devices];
+
+            // 1. Register explicitly positioned devices
+            devices.forEach(d => {
+                if (d.u_position) {
+                    for (let i = 0; i < (d.u_height || 1); i++) {
+                        occupied.add(d.u_position + i);
+                    }
+                }
+            });
+
+            // 2. Auto-assign positions to floating devices
+            let availableU = 1;
+            const positionedDevices = devices.map(dev => {
+                if (!dev.u_position) {
+                    while (occupied.has(availableU)) {
+                        availableU++;
+                    }
+                    const assignedU = availableU;
+                    for (let i = 0; i < (dev.u_height || 1); i++) {
+                        occupied.add(assignedU + i);
+                    }
+                    return { ...dev, u_position: assignedU };
+                }
+                return dev;
+            });
+
+            setRackDevices(positionedDevices)
             setHasChanges(false)
         } else {
             setRackDevices([])
@@ -293,99 +321,105 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
 
                     {/* Rack Visual */}
                     <div className="relative bg-slate-950/50 rounded-xl p-4 border border-white/5">
-                        {/* U Units */}
-                        <div className="flex gap-2">
-                            {/* U Labels */}
-                            <div className="flex flex-col-reverse gap-0.5">
-                                {Array.from({ length: U_TOTAL }).map((_, i) => (
-                                    <div
-                                        key={i}
-                                        className="h-6 flex items-center justify-center text-[8px] text-slate-500 font-mono w-8"
-                                    >
-                                        U{i + 1}
+                        {(() => {
+                            const maxPos = rackDevices.reduce((max, d) => Math.max(max, (d.u_position || 1) + (d.u_height || 1) - 1), U_TOTAL);
+                            const dynamicU = Math.max(U_TOTAL, maxPos);
+
+                            return (
+                                <div className="flex gap-2">
+                                    {/* U Labels */}
+                                    <div className="flex flex-col-reverse gap-0.5">
+                                        {Array.from({ length: dynamicU }).map((_, i) => (
+                                            <div
+                                                key={i}
+                                                className="h-6 flex items-center justify-center text-[8px] text-slate-500 font-mono w-8"
+                                            >
+                                                U{i + 1}
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
 
-                            {/* Rack Slots */}
-                            <div className="flex-1 flex flex-col-reverse gap-0.5 relative">
-                                {Array.from({ length: U_TOTAL }).map((_, uIndex) => {
-                                    const uPosition = uIndex + 1
-                                    const deviceAtU = rackDevices.find(d => d.u_position === uPosition)
+                                    {/* Rack Slots */}
+                                    <div className="flex-1 flex flex-col-reverse gap-0.5 relative">
+                                        {Array.from({ length: dynamicU }).map((_, uIndex) => {
+                                            const uPosition = uIndex + 1
+                                            const deviceAtU = rackDevices.find(d => d.u_position === uPosition)
 
-                                    return (
-                                        <div
-                                            key={uIndex}
-                                            onDragOver={(e) => e.preventDefault()}
-                                            onDrop={() => handleDeviceDrop(uPosition)}
-                                            className={`h-6 rounded border transition-all ${deviceAtU
-                                                ? 'bg-blue-600/20 border-blue-500/50'
-                                                : 'bg-slate-800/30 border-slate-700/30 hover:border-blue-500/30'
-                                                }`}
-                                        >
-                                            {deviceAtU && (
+                                            return (
                                                 <div
-                                                    draggable
-                                                    onDragStart={() => handleDeviceDragStart(deviceAtU)}
-                                                    className="h-full px-2 flex items-center justify-between group relative"
+                                                    key={uIndex}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                    onDrop={() => handleDeviceDrop(uPosition)}
+                                                    className={`h-6 rounded border transition-all ${deviceAtU
+                                                        ? 'bg-blue-600/20 border-blue-500/50'
+                                                        : 'bg-slate-800/30 border-slate-700/30 hover:border-blue-500/30'
+                                                        }`}
                                                 >
-                                                    <span className="text-[9px] text-blue-300 font-mono truncate flex-1 cursor-move">
-                                                        {deviceAtU.type || 'Device'}
-                                                    </span>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDeleteDevice(deviceAtU);
-                                                        }}
-                                                        onMouseDown={(e) => e.stopPropagation()}
-                                                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/30 bg-red-500/20 rounded transition-all cursor-pointer z-10"
-                                                        title="Eliminar dispositivo"
-                                                    >
-                                                        <Trash2 size={12} className="text-red-400" />
-                                                    </button>
+                                                    {deviceAtU && (
+                                                        <div
+                                                            draggable
+                                                            onDragStart={() => handleDeviceDragStart(deviceAtU)}
+                                                            className="h-full px-2 flex items-center justify-between group relative"
+                                                        >
+                                                            <span className="text-[9px] text-blue-300 font-mono truncate flex-1 cursor-move">
+                                                                {deviceAtU.type || 'Device'}
+                                                            </span>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleDeleteDevice(deviceAtU);
+                                                                }}
+                                                                onMouseDown={(e) => e.stopPropagation()}
+                                                                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/30 bg-red-500/20 rounded transition-all cursor-pointer z-10"
+                                                                title="Eliminar dispositivo"
+                                                            >
+                                                                <Trash2 size={12} className="text-red-400" />
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        </div>
-
-                        {/* Stats */}
-                        <div className="mt-4 pt-4 border-t border-white/5 grid grid-cols-2 gap-3">
-                            <div>
-                                <p className="text-[9px] text-slate-500 uppercase">Dispositivos</p>
-                                <p className="text-sm font-bold text-white">{rackDevices.length}</p>
-                            </div>
-                            <div>
-                                <p className="text-[9px] text-slate-500 uppercase">UR Usados</p>
-                                <p className="text-sm font-bold text-blue-400">
-                                    {rackDevices.reduce((acc, d) => acc + (d.u_height || 1), 0)} / {U_TOTAL}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-[9px] text-slate-500 uppercase">Estado</p>
-                                <p className="text-sm font-bold text-green-400">{selectedRack.estado || 'N/A'}</p>
-                            </div>
-                            <div>
-                                <p className="text-[9px] text-slate-500 uppercase">Consumo</p>
-                                <p className="text-sm font-bold text-yellow-400">{selectedRack.consumo?.toFixed(2) || '0.00'} KW</p>
-                            </div>
-                        </div>
-
-                        {/* Save Button */}
-                        <button
-                            onClick={handleSaveChanges}
-                            disabled={!hasChanges}
-                            className={`mt-4 w-full py-3 px-4 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 ${hasChanges
-                                ? 'bg-blue-600 hover:bg-blue-500 text-white cursor-pointer shadow-lg shadow-blue-500/20'
-                                : 'bg-slate-800/50 text-slate-600 cursor-not-allowed'
-                                }`}
-                        >
-                            <Save size={16} />
-                            {hasChanges ? 'Guardar Cambios' : 'Sin Cambios'}
-                        </button>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            )
+                        })()}
                     </div>
+
+                    {/* Stats */}
+                    <div className="mt-4 pt-4 border-t border-white/5 grid grid-cols-2 gap-3">
+                        <div>
+                            <p className="text-[9px] text-slate-500 uppercase">Dispositivos</p>
+                            <p className="text-sm font-bold text-white">{rackDevices.length}</p>
+                        </div>
+                        <div>
+                            <p className="text-[9px] text-slate-500 uppercase">UR Usados</p>
+                            <p className="text-sm font-bold text-blue-400">
+                                {rackDevices.reduce((acc, d) => acc + (d.u_height || 1), 0)} / {Math.max(U_TOTAL, rackDevices.reduce((max, d) => Math.max(max, (d.u_position || 1) + (d.u_height || 1) - 1), U_TOTAL))}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-[9px] text-slate-500 uppercase">Estado</p>
+                            <p className="text-sm font-bold text-green-400">{selectedRack.estado || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p className="text-[9px] text-slate-500 uppercase">Consumo</p>
+                            <p className="text-sm font-bold text-yellow-400">{selectedRack.consumo?.toFixed(2) || '0.00'} KW</p>
+                        </div>
+                    </div>
+
+                    {/* Save Button */}
+                    <button
+                        onClick={handleSaveChanges}
+                        disabled={!hasChanges}
+                        className={`mt-4 w-full py-3 px-4 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 ${hasChanges
+                            ? 'bg-blue-600 hover:bg-blue-500 text-white cursor-pointer shadow-lg shadow-blue-500/20'
+                            : 'bg-slate-800/50 text-slate-600 cursor-not-allowed'
+                            }`}
+                    >
+                        <Save size={16} />
+                        {hasChanges ? 'Guardar Cambios' : 'Sin Cambios'}
+                    </button>
                 </motion.div>
             )}
         </div>

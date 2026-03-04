@@ -7,6 +7,9 @@ import { RackLayout } from './components/RackLayout'
 import { UserManagement } from './components/UserManagement'
 import { StatusIndicators } from './components/StatusIndicators'
 import { parseAssetExcel, downloadTemplate, RackAsset, U_TOTAL } from './utils/excelUtils'
+import { Login } from './components/Login'
+import { supabase } from './lib/supabase'
+import { User } from '@supabase/supabase-js'
 
 const INITIAL_ASSETS: RackAsset[] = [
     {
@@ -29,6 +32,8 @@ const INITIAL_ASSETS: RackAsset[] = [
 ]
 
 function App() {
+    const [user, setUser] = useState<User | null>(null)
+    const [authLoading, setAuthLoading] = useState(true)
     const [activeTab, setActiveTab] = useState('dashboard')
     const [assets, setAssets] = useState<RackAsset[]>(INITIAL_ASSETS)
     const [previewData, setPreviewData] = useState<RackAsset[]>([])
@@ -50,6 +55,22 @@ function App() {
     const [dashboardSelectedRack, setDashboardSelectedRack] = useState<RackAsset | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null)
+
+    // Auth persistence
+    useEffect(() => {
+        // Check active sessions and sets the user
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setUser(session?.user ?? null)
+            setAuthLoading(false)
+        })
+
+        // Listen for changes on auth state (logged in, signed out, etc.)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null)
+        })
+
+        return () => subscription.unsubscribe()
+    }, [])
 
     // Load from localStorage
     useEffect(() => {
@@ -215,8 +236,21 @@ function App() {
         }
     };
 
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-[#05070a] flex items-center justify-center">
+                <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+            </div>
+        )
+    }
+
+    if (!user) {
+        return <Login onLoginSuccess={setUser} />
+    }
+
     return (
         <div className="premium-bg flex h-screen overflow-hidden text-slate-200">
+            {/* Sidebar... */}
             {/* Sidebar */}
             <aside className="w-64 glass-card m-4 p-6 flex flex-col gap-8">
                 <div className="flex items-center gap-3">
@@ -253,6 +287,16 @@ function App() {
                         </button>
                     ))}
                 </nav>
+
+                <div className="mt-auto pt-6 border-t border-white/5">
+                    <button
+                        onClick={() => supabase.auth.signOut()}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition-all border border-transparent hover:border-red-500/20"
+                    >
+                        <X size={20} />
+                        <span className="font-medium uppercase tracking-widest text-xs">Cerrar Sesión</span>
+                    </button>
+                </div>
             </aside>
 
             {/* Main Content */}

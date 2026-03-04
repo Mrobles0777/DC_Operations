@@ -22,6 +22,16 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
         return 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]';
     };
 
+    const getDeviceIcon = (type: string) => {
+        const t = (type || '').toLowerCase();
+        if (t.includes('servidor') || t.includes('server')) return Server;
+        if (t.includes('switch') || t.includes('sw') || t.includes('red') || t.includes('net')) return Activity;
+        if (t.includes('pdu') || t.includes('ups') || t.includes('energia') || t.includes('power') || t.includes('zap')) return Zap;
+        if (t.includes('disco') || t.includes('storage') || t.includes('san') || t.includes('nas')) return HardDrive;
+        if (t.includes('firewall') || t.includes('seguridad') || t.includes('forti') || t.includes('cisco')) return Shield;
+        return Server;
+    };
+
     return (
         <div className={`flex flex-col gap-6 h-full ${!hideHeader ? 'p-8 glass-card bg-slate-900/60 border-white/10' : ''} max-w-7xl mx-auto overflow-hidden`}>
             {!hideHeader && (
@@ -186,6 +196,7 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                         <div className="flex-1 space-y-4 overflow-y-auto pr-4 custom-scrollbar pb-10">
                             {sortedDevices.map((dev) => {
                                 const isHovered = hoveredDeviceId === dev.id;
+                                const DevIcon = getDeviceIcon(dev.type || '');
                                 return (
                                     <motion.div
                                         key={dev.id}
@@ -246,7 +257,7 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                                             </div>
 
                                             <div className={`p-4 rounded-3xl border transition-all duration-500 ${isHovered ? 'bg-blue-600 text-white shadow-[0_0_30px_rgba(37,99,235,0.4)]' : 'bg-slate-900 border-white/5 text-slate-500'}`}>
-                                                <Server size={32} strokeWidth={2.5} />
+                                                <DevIcon size={32} strokeWidth={2.5} />
                                             </div>
                                         </div>
 

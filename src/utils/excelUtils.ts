@@ -109,7 +109,7 @@ export const parseAssetExcel = async (file: File): Promise<RackAsset[]> => {
                     // Composite key to handle multiple sites/rooms with same coordinates - Normalizing to Uppercase
                     const rackKey = `${site.toUpperCase()}-${room.toUpperCase()}-${rackId.toUpperCase()}`;
 
-                    if (!racksMap[rackKey] && isRackHeader) {
+                    if (!racksMap[rackKey]) {
                         const inferredCoords = parseCoords(rackId);
 
                         racksMap[rackKey] = {
@@ -119,18 +119,20 @@ export const parseAssetExcel = async (file: File): Promise<RackAsset[]> => {
                             sala: room,
                             sitio: site,
                             piso: String(row['D'] || '').trim(),
-                            estado: String(row['P'] || 'Operativo'), // Status from Column P
+                            estado: isRackHeader ? String(row['P'] || 'Operativo') : 'Operativo',
                             propietario: String(row['L'] || '').trim(),
                             pos_x: inferredCoords ? inferredCoords.x : (Object.keys(racksMap).length % 20) * 2 + 1,
                             pos_z: inferredCoords ? inferredCoords.z : Math.floor(Object.keys(racksMap).length / 20) * 3 + 1,
-                            consumo: safeParseNumber(row['AD']) || 0, // Initial from AD
-                            alarm_hardware: safeParseAlarm(row['R']),
-                            alarm_ventilador: safeParseAlarm(row['S']),
-                            alarm_fuente: safeParseAlarm(row['T']),
-                            alarm_hdd: safeParseAlarm(row['U']),
+                            consumo: isRackHeader ? (safeParseNumber(row['AD']) || 0) / 1000 : 0,
+                            alarm_hardware: isRackHeader ? safeParseAlarm(row['R']) : undefined,
+                            alarm_ventilador: isRackHeader ? safeParseAlarm(row['S']) : undefined,
+                            alarm_fuente: isRackHeader ? safeParseAlarm(row['T']) : undefined,
+                            alarm_hdd: isRackHeader ? safeParseAlarm(row['U']) : undefined,
                             devices: []
                         };
-                    } else if (racksMap[rackKey]) {
+                    }
+
+                    if (racksMap[rackKey]) {
                         // If the rack exists, we process additional info or devices
                         const marca = String(row['E'] || '').trim(); // Marca seems to be E
                         const modelo = String(row['F'] || '').trim(); // Modelo seems to be F
@@ -154,15 +156,15 @@ export const parseAssetExcel = async (file: File): Promise<RackAsset[]> => {
                             };
                             racksMap[rackKey].devices.push(device);
 
-                            // Sum to rack total if we just added a device with watts
+                            // Sum to rack total if we just added a device with watts - Convert Watts to KW
                             if (deviceWatts) {
-                                racksMap[rackKey].consumo = (racksMap[rackKey].consumo || 0) + deviceWatts;
+                                racksMap[rackKey].consumo = (racksMap[rackKey].consumo || 0) + (deviceWatts / 1000);
                             }
                         } else if (isRackHeader) {
                             // Update header info if multiple rack rows exist for same ID
                             if (marca) racksMap[rackKey].fabricante = marca;
                             if (modelo) racksMap[rackKey].modelo = modelo;
-                            if (deviceWatts) racksMap[rackKey].consumo = deviceWatts;
+                            if (deviceWatts) racksMap[rackKey].consumo = deviceWatts / 1000;
                         }
                     }
                 });

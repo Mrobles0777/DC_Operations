@@ -238,8 +238,8 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                                             y={gridY + (SCALE * 0.1)}
                                             width={SCALE * 0.8}
                                             height={SCALE * 0.8}
-                                            fill={isSelected ? '#2563eb' : '#ffffff'}
-                                            stroke={isSelected ? '#3b82f6' : '#e2e8f0'}
+                                            fill={isSelected ? '#2563eb' : '#0f172a'}
+                                            stroke={isSelected ? '#3b82f6' : '#1e293b'}
                                             className="transition-colors duration-300 shadow-sm"
                                             rx="2"
                                         />
@@ -247,7 +247,7 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                                             x={(asset.pos_x - 1) * SCALE + (SCALE * 0.4)}
                                             y={gridY + (SCALE * 0.55)}
                                             textAnchor="middle"
-                                            fill={isSelected ? "white" : "#64748b"}
+                                            fill={isSelected ? "white" : "#94a3b8"}
                                             fontSize="5"
                                             className="font-mono font-bold pointer-events-none"
                                         >
@@ -289,7 +289,7 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                         <span className="text-slate-500 uppercase tracking-wider">Rack Seleccionado</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-white border border-slate-200 rounded-sm"></div>
+                        <div className="w-2 h-2 bg-[#0f172a] border border-slate-700 rounded-sm"></div>
                         <span className="text-slate-500 uppercase tracking-wider">Rack Standby</span>
                     </div>
                 </div>
@@ -320,7 +320,7 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                     </div>
 
                     {/* Rack Visual */}
-                    <div className="relative bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-inner">
+                    <div className="relative bg-[#0a0a0a] rounded-xl p-4 border border-slate-800 shadow-inner">
                         {(() => {
                             const maxPos = rackDevices.reduce((max, d) => Math.max(max, (d.u_position || 1) + (d.u_height || 1) - 1), U_TOTAL);
                             const dynamicU = Math.max(U_TOTAL, maxPos);
@@ -351,8 +351,8 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                                                     onDragOver={(e) => e.preventDefault()}
                                                     onDrop={() => handleDeviceDrop(uPosition)}
                                                     className={`h-6 rounded border transition-all ${deviceAtU
-                                                        ? 'bg-blue-600/10 border-blue-500/30'
-                                                        : 'bg-white border-slate-200 hover:border-blue-500/30 shadow-xs'
+                                                        ? 'bg-blue-600/20 border-blue-500/30'
+                                                        : 'bg-slate-900 border-slate-800 hover:border-blue-500/30 shadow-xs'
                                                         }`}
                                                 >
                                                     {deviceAtU && (

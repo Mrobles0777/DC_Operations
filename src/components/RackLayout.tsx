@@ -109,7 +109,7 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
 
                     {/* 3D Isometric Container */}
                     <div
-                        className={`${isCompact ? 'w-56 scale-90' : 'w-80'} relative bg-white rounded-xl border-[16px] border-slate-100 shadow-[0_40px_80px_rgba(0,0,0,0.08)] flex flex-col p-1 overflow-visible ring-4 ring-slate-50 transition-all duration-700
+                        className={`${isCompact ? 'w-56 scale-90' : 'w-80'} relative bg-[#0a0a0a] rounded-xl border-[16px] border-[#1a1a1a] shadow-[0_40px_80px_rgba(0,0,0,0.2)] flex flex-col p-1 overflow-visible ring-4 ring-slate-900/10 transition-all duration-700
                             [transform:rotateX(15deg)_rotateY(-15deg)_skewX(0deg)] hover:[transform:rotateX(5deg)_rotateY(-5deg)] shadow-inner`}
                     >
                         {/* 3D Depth Sides */}
@@ -123,19 +123,19 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                             return (
                                 <div className="flex flex-col overflow-y-auto custom-scrollbar max-h-[750px] relative">
                                     {/* Realistic Industrial Rails with 3D Depth */}
-                                    <div className="absolute left-8 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100 border-x border-slate-200 z-0 flex flex-col py-2 space-y-2 shadow-sm">
+                                    <div className="absolute left-8 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 flex flex-col py-2 space-y-2 shadow-sm">
                                         {Array.from({ length: totalU }).map((_, i) => (
-                                            <div key={i} className="flex flex-col items-center gap-1 opacity-40">
-                                                <div className="w-1.5 h-1.5 bg-slate-400 rounded-sm border border-slate-300 shadow-inner"></div>
-                                                <div className="w-1.5 h-1.5 bg-slate-400 rounded-sm border border-slate-300 shadow-inner"></div>
+                                            <div key={i} className="flex flex-col items-center gap-1 opacity-20">
+                                                <div className="w-1.5 h-1.5 bg-slate-600 rounded-sm border border-slate-700 shadow-inner"></div>
+                                                <div className="w-1.5 h-1.5 bg-slate-600 rounded-sm border border-slate-700 shadow-inner"></div>
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="absolute right-8 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100 border-x border-slate-200 z-0 flex flex-col py-2 space-y-2 shadow-sm">
+                                    <div className="absolute right-8 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 flex flex-col py-2 space-y-2 shadow-sm">
                                         {Array.from({ length: totalU }).map((_, i) => (
-                                            <div key={i} className="flex flex-col items-center gap-1 opacity-40">
-                                                <div className="w-1.5 h-1.5 bg-slate-400 rounded-sm border border-slate-300 shadow-inner"></div>
-                                                <div className="w-1.5 h-1.5 bg-slate-400 rounded-sm border border-slate-300 shadow-inner"></div>
+                                            <div key={i} className="flex flex-col items-center gap-1 opacity-20">
+                                                <div className="w-1.5 h-1.5 bg-slate-600 rounded-sm border border-slate-700 shadow-inner"></div>
+                                                <div className="w-1.5 h-1.5 bg-slate-600 rounded-sm border border-slate-700 shadow-inner"></div>
                                             </div>
                                         ))}
                                     </div>
@@ -157,9 +157,9 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                                                 key={uNumber}
                                                 onMouseEnter={() => deviceAtU && setHoveredDeviceId(deviceAtU.id)}
                                                 onMouseLeave={() => setHoveredDeviceId(null)}
-                                                className={`h-[22px] w-full border-b border-slate-50 flex items-center px-2 relative transition-all ${deviceAtU ? 'bg-blue-50/10' : 'hover:bg-slate-50'}`}
+                                                className={`h-[22px] w-full border-b border-white/5 flex items-center px-2 relative transition-all ${deviceAtU ? 'bg-blue-500/5' : 'hover:bg-white/5'}`}
                                             >
-                                                <span className="text-[7px] text-slate-300 font-black absolute left-2 select-none font-mono">{uNumber}</span>
+                                                <span className="text-[7px] text-slate-600 font-black absolute left-2 select-none font-mono">{uNumber}</span>
 
                                                 {deviceAtU && isTopMostUnit && (
                                                     <motion.div

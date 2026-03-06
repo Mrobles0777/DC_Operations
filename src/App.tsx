@@ -520,21 +520,21 @@ function App() {
                                                             key={rack.id}
                                                             whileHover={{ y: -4, scale: 1.02 }}
                                                             onClick={() => setDashboardSelectedRack(rack)}
-                                                            className={`group relative flex flex-col bg-white border ${isSelected ? 'border-blue-500 shadow-[0_4px_20px_rgba(59,130,246,0.15)]' : isAlert ? 'border-red-500/30' : 'border-slate-100'} hover:border-blue-400/50 rounded-xl p-3 transition-all cursor-pointer overflow-hidden shadow-sm`}
+                                                            className={`group relative flex flex-col ${isSelected ? 'bg-slate-900 border-blue-500 shadow-[0_4px_20px_rgba(59,130,246,0.2)]' : 'bg-slate-950 border-slate-800'} hover:border-blue-400/50 rounded-xl p-3 transition-all cursor-pointer overflow-hidden shadow-sm`}
                                                         >
                                                             {isAlert && <div className="absolute top-0 right-0 w-8 h-8 bg-red-500/10 rounded-bl-3xl flex items-start justify-end p-1"><AlertTriangle size={12} className="text-red-500 animate-pulse" /></div>}
 
                                                             <div className="flex justify-between items-start mb-3">
                                                                 <div className="flex flex-col">
-                                                                    <span className={`text-[11px] font-black font-mono tracking-tighter ${isSelected ? 'text-blue-600' : 'text-slate-900'} group-hover:text-blue-600 transition-colors`}>{rack.tag_id}</span>
-                                                                    <span className="text-[7px] text-slate-400 font-black uppercase tracking-tight">{rack.sala}</span>
+                                                                    <span className={`text-[11px] font-black font-mono tracking-tighter ${isSelected ? 'text-blue-400' : 'text-slate-100'} group-hover:text-blue-400 transition-colors`}>{rack.tag_id}</span>
+                                                                    <span className="text-[7px] text-slate-500 font-black uppercase tracking-tight">{rack.sala}</span>
                                                                 </div>
                                                                 <span className={`w-1.5 h-1.5 rounded-full ${rack.estado?.toUpperCase() === 'OPERATIVO' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]' : 'bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.3)]'}`}></span>
                                                             </div>
 
                                                             <div className="flex-1 flex gap-2 items-end">
                                                                 {/* Modern Vertical Gauge */}
-                                                                <div className="w-2.5 h-16 bg-slate-50 rounded-full border border-slate-100 p-0.5 overflow-hidden flex flex-col-reverse relative shadow-inner">
+                                                                <div className="w-2.5 h-16 bg-black/40 rounded-full border border-slate-800 p-0.5 overflow-hidden flex flex-col-reverse relative shadow-inner">
                                                                     <motion.div
                                                                         initial={{ height: 0 }}
                                                                         animate={{ height: `${uPercent}%` }}
@@ -543,10 +543,10 @@ function App() {
                                                                 </div>
 
                                                                 <div className="flex-1 flex flex-col justify-end">
-                                                                    <p className="text-[14px] font-black text-slate-900 leading-none font-mono">
-                                                                        {uPercent.toFixed(0)}<span className="text-[8px] text-blue-600 ml-0.5">%</span>
+                                                                    <p className="text-[14px] font-black text-slate-100 leading-none font-mono">
+                                                                        {uPercent.toFixed(0)}<span className="text-[8px] text-blue-400 ml-0.5">%</span>
                                                                     </p>
-                                                                    <p className="text-[7px] text-slate-400 font-black uppercase mt-1">OCCUPANCY</p>
+                                                                    <p className="text-[7px] text-slate-500 font-black uppercase mt-1">OCCUPANCY</p>
                                                                 </div>
                                                             </div>
                                                         </motion.div>

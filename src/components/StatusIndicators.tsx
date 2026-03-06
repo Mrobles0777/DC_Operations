@@ -28,7 +28,7 @@ const CircularIndicator = ({ label, percentage, color, description }: IndicatorP
                         fill="transparent"
                         stroke="currentColor"
                         strokeWidth="6"
-                        className="text-slate-800/40"
+                        className="text-slate-100"
                     />
                     {/* Progress Circle */}
                     <motion.circle
@@ -46,11 +46,11 @@ const CircularIndicator = ({ label, percentage, color, description }: IndicatorP
                     />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-lg font-black text-white">
+                    <span className="text-lg font-black text-slate-900">
                         {isNaNVal ? 'NaN%' : `${Math.round(percentage)}%`}
                     </span>
                     {description && (
-                        <span className="text-[7px] text-slate-500 font-bold uppercase mt-0.5">
+                        <span className="text-[7px] text-slate-400 font-bold uppercase mt-0.5">
                             {description}
                         </span>
                     )}
@@ -70,10 +70,10 @@ export const StatusIndicators = ({
     const indicators = [
         { label: 'Alarmas de Hardware', percentage: alarms.hardware, color: '#ef4444' },
         { label: 'Alarmas de Ventilador', percentage: alarms.ventilador, color: '#3b82f6' },
-        { label: 'Alarmas Fuente Poder', percentage: alarms.fuente, color: '#94a3b8' },
+        { label: 'Alarmas Fuente Poder', percentage: alarms.fuente, color: '#64748b' },
         { label: 'Alarmas de HDD', percentage: alarms.hdd, color: '#f59e0b' },
-        { label: 'Rack Operativos', percentage: racksStats.total > 0 ? 100 : 0, color: '#1e293b', description: racksStats.total.toString() },
-        { label: 'Ocupacion UR', percentage: parseFloat(racksStats.usage || '0'), color: '#1e293b' },
+        { label: 'Rack Operativos', percentage: racksStats.total > 0 ? 100 : 0, color: '#2563eb', description: racksStats.total.toString() },
+        { label: 'Ocupacion UR', percentage: parseFloat(racksStats.usage || '0'), color: '#2563eb' },
     ];
 
     return (

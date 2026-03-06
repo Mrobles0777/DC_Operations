@@ -125,26 +125,26 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
     return (
         <div className="relative w-full h-[600px] flex gap-4">
             {/* Floor Plan View */}
-            <div className={`relative ${selectedRack ? 'w-2/3' : 'w-full'} bg-slate-900/50 rounded-2xl overflow-hidden border border-white/5 shadow-inner transition-all duration-300`}>
+            <div className={`relative ${selectedRack ? 'w-2/3' : 'w-full'} bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-300`}>
                 {/* Controls */}
                 <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
                     <button
                         onClick={() => setZoom(z => Math.min(3, z + 0.1))}
-                        className="p-2 glass-card hover:bg-white/10 text-white rounded-lg transition-colors"
+                        className="p-2 bg-white/80 backdrop-blur-md border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg transition-colors shadow-sm"
                         title="Zoom In"
                     >
                         <ZoomIn size={20} />
                     </button>
                     <button
                         onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}
-                        className="p-2 glass-card hover:bg-white/10 text-white rounded-lg transition-colors"
+                        className="p-2 bg-white/80 backdrop-blur-md border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg transition-colors shadow-sm"
                         title="Zoom Out"
                     >
                         <ZoomOut size={20} />
                     </button>
                     <button
                         onClick={() => { setZoom(1); setOffset({ x: 0, y: 0 }) }}
-                        className="p-2 glass-card hover:bg-white/10 text-white rounded-lg transition-colors"
+                        className="p-2 bg-white/80 backdrop-blur-md border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-lg transition-colors shadow-sm"
                         title="Reset View"
                     >
                         <Maximize2 size={20} />
@@ -170,9 +170,9 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                             <rect
                                 width={room.width * SCALE}
                                 height={room.height * SCALE}
-                                fill="#0f172a"
-                                stroke="#1e293b"
-                                strokeWidth="4"
+                                fill="#f8fafc"
+                                stroke="#e2e8f0"
+                                strokeWidth="2"
                             />
 
                             {/* Grid Lines & Labels */}
@@ -232,22 +232,22 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                                             initial={false}
                                             animate={{
                                                 scale: isSelected ? 1.1 : 1,
-                                                strokeWidth: isSelected ? 2 : 0
+                                                strokeWidth: isSelected ? 2 : 1
                                             }}
                                             x={(asset.pos_x - 1) * SCALE + (SCALE * 0.1)}
                                             y={gridY + (SCALE * 0.1)}
                                             width={SCALE * 0.8}
                                             height={SCALE * 0.8}
-                                            fill={isSelected ? '#3b82f6' : '#1e293b'}
-                                            stroke="#60a5fa"
-                                            className="transition-colors duration-300 shadow-lg"
+                                            fill={isSelected ? '#2563eb' : '#ffffff'}
+                                            stroke={isSelected ? '#3b82f6' : '#e2e8f0'}
+                                            className="transition-colors duration-300 shadow-sm"
                                             rx="2"
                                         />
                                         <text
                                             x={(asset.pos_x - 1) * SCALE + (SCALE * 0.4)}
                                             y={gridY + (SCALE * 0.55)}
                                             textAnchor="middle"
-                                            fill={isSelected ? "white" : "#475569"}
+                                            fill={isSelected ? "white" : "#64748b"}
                                             fontSize="5"
                                             className="font-mono font-bold pointer-events-none"
                                         >
@@ -263,19 +263,19 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                 {/* Selection/Hover Details Overlay */}
                 {(hoveredAsset || selectedRackId) && (
                     <div className="absolute bottom-4 right-4 glass-card p-4 min-w-[200px] pointer-events-none">
-                        <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Activo Seleccionado</p>
-                        <p className="text-white font-bold">{(hoveredAsset || assets.find(a => a.id === selectedRackId))?.tag_id}</p>
-                        <p className="text-slate-400 text-xs mt-1">
+                        <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Activo Seleccionado</p>
+                        <p className="text-slate-900 font-bold">{(hoveredAsset || assets.find(a => a.id === selectedRackId))?.tag_id}</p>
+                        <p className="text-slate-500 text-xs mt-1">
                             Posición: {(hoveredAsset || assets.find(a => a.id === selectedRackId))?.pos_x}, {(hoveredAsset || assets.find(a => a.id === selectedRackId))?.pos_z}
                         </p>
-                        <p className="text-blue-400 text-xs mt-2">
+                        <p className="text-blue-600 text-xs mt-2 font-medium">
                             {(hoveredAsset || assets.find(a => a.id === selectedRackId))?.devices.length} dispositivos montados
                         </p>
                         {((hoveredAsset || assets.find(a => a.id === selectedRackId))?.consumo !== undefined) && (
-                            <div className="mt-3 pt-3 border-t border-white/5">
+                            <div className="mt-3 pt-3 border-t border-slate-100">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[10px] text-slate-500 uppercase">Consumo</span>
-                                    <span className="text-[10px] font-bold text-blue-400">{(hoveredAsset || assets.find(a => a.id === selectedRackId))?.consumo} KW</span>
+                                    <span className="text-[10px] text-slate-400 uppercase">Consumo</span>
+                                    <span className="text-[10px] font-bold text-blue-600">{(hoveredAsset || assets.find(a => a.id === selectedRackId))?.consumo} KW</span>
                                 </div>
                             </div>
                         )}
@@ -285,12 +285,12 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                 {/* Legend */}
                 <div className="absolute bottom-4 left-4 glass-card p-4 text-[10px] flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-sm"></div>
-                        <span className="text-slate-300 uppercase letter-spacing-wider">Rack Seleccionado</span>
+                        <div className="w-2 h-2 bg-blue-600 rounded-sm"></div>
+                        <span className="text-slate-500 uppercase tracking-wider">Rack Seleccionado</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-slate-800 border border-slate-700 rounded-sm"></div>
-                        <span className="text-slate-300 uppercase letter-spacing-wider">Rack Standby</span>
+                        <div className="w-2 h-2 bg-white border border-slate-200 rounded-sm"></div>
+                        <span className="text-slate-500 uppercase tracking-wider">Rack Standby</span>
                     </div>
                 </div>
             </div>
@@ -301,26 +301,26 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                     initial={{ x: 300, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     exit={{ x: 300, opacity: 0 }}
-                    className="w-1/3 glass-card border-white/5 rounded-2xl p-6 overflow-auto"
+                    className="w-1/3 bg-white border border-slate-200 rounded-2xl p-6 overflow-auto shadow-sm"
                 >
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                            <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                                 Layout Frontal: {selectedRack.tag_id}
                             </h3>
-                            <p className="text-slate-400 text-xs mt-1">Arrastra para mover • Click para eliminar</p>
+                            <p className="text-slate-500 text-xs mt-1">Arrastra para mover • Click para eliminar</p>
                         </div>
                         <button
                             onClick={() => onSelectRack?.(selectedRack)}
-                            className="p-2 hover:bg-white/5 text-slate-400 hover:text-white rounded-lg transition-colors"
+                            className="p-2 hover:bg-slate-50 text-slate-400 hover:text-slate-600 rounded-lg transition-colors"
                         >
                             <X size={20} />
                         </button>
                     </div>
 
                     {/* Rack Visual */}
-                    <div className="relative bg-slate-950/50 rounded-xl p-4 border border-white/5">
+                    <div className="relative bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-inner">
                         {(() => {
                             const maxPos = rackDevices.reduce((max, d) => Math.max(max, (d.u_position || 1) + (d.u_height || 1) - 1), U_TOTAL);
                             const dynamicU = Math.max(U_TOTAL, maxPos);
@@ -332,7 +332,7 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                                         {Array.from({ length: dynamicU }).map((_, i) => (
                                             <div
                                                 key={i}
-                                                className="h-6 flex items-center justify-center text-[8px] text-slate-500 font-mono w-8"
+                                                className="h-6 flex items-center justify-center text-[8px] text-slate-400 font-mono w-8 font-bold"
                                             >
                                                 U{i + 1}
                                             </div>
@@ -351,8 +351,8 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                                                     onDragOver={(e) => e.preventDefault()}
                                                     onDrop={() => handleDeviceDrop(uPosition)}
                                                     className={`h-6 rounded border transition-all ${deviceAtU
-                                                        ? 'bg-blue-600/20 border-blue-500/50'
-                                                        : 'bg-slate-800/30 border-slate-700/30 hover:border-blue-500/30'
+                                                        ? 'bg-blue-600/10 border-blue-500/30'
+                                                        : 'bg-white border-slate-200 hover:border-blue-500/30 shadow-xs'
                                                         }`}
                                                 >
                                                     {deviceAtU && (
@@ -361,7 +361,7 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                                                             onDragStart={() => handleDeviceDragStart(deviceAtU)}
                                                             className="h-full px-2 flex items-center justify-between group relative"
                                                         >
-                                                            <span className="text-[9px] text-blue-300 font-mono truncate flex-1 cursor-move">
+                                                            <span className="text-[9px] text-blue-700 font-mono font-bold truncate flex-1 cursor-move">
                                                                 {deviceAtU.type || 'Device'}
                                                             </span>
                                                             <button
@@ -370,10 +370,10 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                                                                     handleDeleteDevice(deviceAtU);
                                                                 }}
                                                                 onMouseDown={(e) => e.stopPropagation()}
-                                                                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/30 bg-red-500/20 rounded transition-all cursor-pointer z-10"
+                                                                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 bg-red-50 rounded transition-all cursor-pointer z-10"
                                                                 title="Eliminar dispositivo"
                                                             >
-                                                                <Trash2 size={12} className="text-red-400" />
+                                                                <Trash2 size={12} className="text-red-500" />
                                                             </button>
                                                         </div>
                                                     )}
@@ -387,24 +387,24 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                     </div>
 
                     {/* Stats */}
-                    <div className="mt-4 pt-4 border-t border-white/5 grid grid-cols-2 gap-3">
+                    <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-3">
                         <div>
-                            <p className="text-[9px] text-slate-500 uppercase">Dispositivos</p>
-                            <p className="text-sm font-bold text-white">{rackDevices.length}</p>
+                            <p className="text-[9px] text-slate-400 uppercase font-bold">Dispositivos</p>
+                            <p className="text-sm font-bold text-slate-900">{rackDevices.length}</p>
                         </div>
                         <div>
-                            <p className="text-[9px] text-slate-500 uppercase">UR Usados</p>
-                            <p className="text-sm font-bold text-blue-400">
+                            <p className="text-[9px] text-slate-400 uppercase font-bold">UR Usados</p>
+                            <p className="text-sm font-bold text-blue-600">
                                 {rackDevices.reduce((acc, d) => acc + (d.u_height || 1), 0)} / {Math.max(U_TOTAL, rackDevices.reduce((max, d) => Math.max(max, (d.u_position || 1) + (d.u_height || 1) - 1), U_TOTAL))}
                             </p>
                         </div>
                         <div>
-                            <p className="text-[9px] text-slate-500 uppercase">Estado</p>
-                            <p className="text-sm font-bold text-green-400">{selectedRack.estado || 'N/A'}</p>
+                            <p className="text-[9px] text-slate-400 uppercase font-bold">Estado</p>
+                            <p className="text-sm font-bold text-emerald-600">{selectedRack.estado || 'N/A'}</p>
                         </div>
                         <div>
-                            <p className="text-[9px] text-slate-500 uppercase">Consumo</p>
-                            <p className="text-sm font-bold text-yellow-400">{selectedRack.consumo?.toFixed(2) || '0.00'} KW</p>
+                            <p className="text-[9px] text-slate-400 uppercase font-bold">Consumo</p>
+                            <p className="text-sm font-bold text-amber-600">{selectedRack.consumo?.toFixed(2) || '0.00'} KW</p>
                         </div>
                     </div>
 
@@ -413,8 +413,8 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                         onClick={handleSaveChanges}
                         disabled={!hasChanges}
                         className={`mt-4 w-full py-3 px-4 rounded-lg font-bold text-sm transition-all flex items-center justify-center gap-2 ${hasChanges
-                            ? 'bg-blue-600 hover:bg-blue-500 text-white cursor-pointer shadow-lg shadow-blue-500/20'
-                            : 'bg-slate-800/50 text-slate-600 cursor-not-allowed'
+                            ? 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer shadow-lg shadow-blue-500/10'
+                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                             }`}
                     >
                         <Save size={16} />

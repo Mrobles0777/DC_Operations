@@ -64,37 +64,37 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
     };
 
     return (
-        <div className={`flex flex-col gap-6 h-full ${!hideHeader ? 'p-8 glass-card bg-slate-900/60 border-white/10' : ''} max-w-7xl mx-auto overflow-hidden`}>
+        <div className={`flex flex-col gap-6 h-full ${!hideHeader ? 'p-8 bg-white border border-slate-200 rounded-2xl shadow-sm' : ''} max-w-7xl mx-auto overflow-hidden`}>
             {!hideHeader && (
-                <div className="flex justify-between items-end pb-6 border-b border-white/5">
+                <div className="flex justify-between items-end pb-6 border-b border-slate-100">
                     <div className="space-y-2">
                         <div className="flex items-center gap-3">
-                            <div className="px-3 py-1 bg-blue-600 rounded text-[10px] font-black tracking-widest text-white shadow-xl shadow-blue-900/40 uppercase font-mono">Rack Unit</div>
-                            <h3 className="text-4xl font-black text-white tracking-tighter uppercase">
+                            <div className="px-3 py-1 bg-blue-600 rounded text-[10px] font-black tracking-widest text-white shadow-lg shadow-blue-500/10 uppercase font-mono">Rack Unit</div>
+                            <h3 className="text-4xl font-black text-slate-900 tracking-tighter uppercase">
                                 {rack.tag_id}
                             </h3>
                         </div>
-                        <div className="flex items-center gap-4 text-slate-400 text-xs font-bold uppercase tracking-wider font-mono">
-                            <span className="flex items-center gap-1.5"><Box size={14} className="text-blue-500" /> {rack.sitio}</span>
-                            <span className="w-1 h-1 bg-slate-700 rounded-full"></span>
-                            <span className="flex items-center gap-1.5"><Activity size={14} className="text-emerald-500" /> {rack.sala}</span>
-                            <span className="w-1 h-1 bg-slate-700 rounded-full"></span>
-                            <span className="text-slate-500">{rack.fabricante} {rack.modelo}</span>
+                        <div className="flex items-center gap-4 text-slate-500 text-xs font-bold uppercase tracking-wider font-mono">
+                            <span className="flex items-center gap-1.5"><Box size={14} className="text-blue-600" /> {rack.sitio}</span>
+                            <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
+                            <span className="flex items-center gap-1.5"><Activity size={14} className="text-emerald-600" /> {rack.sala}</span>
+                            <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
+                            <span className="text-slate-400">{rack.fabricante} {rack.modelo}</span>
                         </div>
                     </div>
 
                     <div className="flex gap-4">
                         <div className="text-right">
-                            <p className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] mb-1">Health Status</p>
-                            <div className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${rack.estado?.toUpperCase() === 'OPERATIVO' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400'}`}>
+                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] mb-1">Health Status</p>
+                            <div className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${rack.estado?.toUpperCase() === 'OPERATIVO' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-amber-50 border-amber-100 text-amber-600'}`}>
                                 {rack.estado || 'Operativo'}
                             </div>
                         </div>
                         {rack.consumo !== undefined && (
-                            <div className="text-right bg-blue-600/5 border border-white/5 p-4 rounded-2xl min-w-[140px] shadow-inner">
-                                <p className="text-[10px] text-slate-500 uppercase font-black tracking-[0.2em] mb-1">Total Load</p>
-                                <p className="text-2xl font-black text-blue-400 font-mono tracking-tighter">
-                                    {(rack.consumo).toFixed(2)} <span className="text-xs text-blue-500/60 uppercase">KW</span>
+                            <div className="text-right bg-blue-50 border border-blue-100 p-4 rounded-2xl min-w-[140px] shadow-sm">
+                                <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] mb-1">Total Load</p>
+                                <p className="text-2xl font-black text-blue-600 font-mono tracking-tighter">
+                                    {(rack.consumo).toFixed(2)} <span className="text-xs text-blue-400 uppercase">KW</span>
                                 </p>
                             </div>
                         )}
@@ -105,15 +105,15 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
             <div className={`flex-1 flex ${isCompact ? 'flex-col items-center' : 'gap-12'} overflow-hidden pt-4`}>
                 {/* Digital Twin Rack Engine with Isometric Perspective */}
                 <div className="flex flex-col items-center gap-6 group/rack perspective-[2000px]">
-                    {!isCompact && <p className="text-[10px] text-slate-500 uppercase font-black tracking-[0.3em] opacity-40 group-hover/rack:opacity-100 transition-opacity">Digital Twin Engine [Isometric]</p>}
+                    {!isCompact && <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.3em] opacity-60 group-hover/rack:opacity-100 transition-opacity">Digital Twin Engine [Isometric]</p>}
 
                     {/* 3D Isometric Container */}
                     <div
-                        className={`${isCompact ? 'w-56 scale-90' : 'w-80'} relative bg-[#0a0c10] rounded-xl border-[16px] border-[#1a1e26] shadow-[0_60px_120px_rgba(0,0,0,0.9)] flex flex-col p-1 overflow-visible ring-4 ring-white/5 transition-all duration-700
-                            [transform:rotateX(15deg)_rotateY(-15deg)_skewX(0deg)] hover:[transform:rotateX(5deg)_rotateY(-5deg)]`}
+                        className={`${isCompact ? 'w-56 scale-90' : 'w-80'} relative bg-white rounded-xl border-[16px] border-slate-100 shadow-[0_40px_80px_rgba(0,0,0,0.08)] flex flex-col p-1 overflow-visible ring-4 ring-slate-50 transition-all duration-700
+                            [transform:rotateX(15deg)_rotateY(-15deg)_skewX(0deg)] hover:[transform:rotateX(5deg)_rotateY(-5deg)] shadow-inner`}
                     >
                         {/* 3D Depth Sides */}
-                        <div className="absolute -left-[30px] top-[10px] bottom-[10px] w-[20px] bg-[#12151c] [transform:rotateY(-90deg)] origin-right opacity-40"></div>
+                        <div className="absolute -left-[30px] top-[10px] bottom-[10px] w-[20px] bg-slate-200 [transform:rotateY(-90deg)] origin-right opacity-30"></div>
 
                         {/* Dynamic Height Calculator */}
                         {(() => {
@@ -123,19 +123,19 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                             return (
                                 <div className="flex flex-col overflow-y-auto custom-scrollbar max-h-[750px] relative">
                                     {/* Realistic Industrial Rails with 3D Depth */}
-                                    <div className="absolute left-8 top-0 bottom-0 w-8 bg-gradient-to-r from-[#12151c] via-[#1a1e26] to-[#0f1117] border-x border-white/5 z-0 flex flex-col py-2 space-y-2 shadow-[inset_-10px_0_15px_rgba(0,0,0,0.5)]">
+                                    <div className="absolute left-8 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100 border-x border-slate-200 z-0 flex flex-col py-2 space-y-2 shadow-sm">
                                         {Array.from({ length: totalU }).map((_, i) => (
-                                            <div key={i} className="flex flex-col items-center gap-1 opacity-20">
-                                                <div className="w-1.5 h-1.5 bg-black rounded-sm border border-white/10 shadow-inner"></div>
-                                                <div className="w-1.5 h-1.5 bg-black rounded-sm border border-white/10 shadow-inner"></div>
+                                            <div key={i} className="flex flex-col items-center gap-1 opacity-40">
+                                                <div className="w-1.5 h-1.5 bg-slate-400 rounded-sm border border-slate-300 shadow-inner"></div>
+                                                <div className="w-1.5 h-1.5 bg-slate-400 rounded-sm border border-slate-300 shadow-inner"></div>
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="absolute right-8 top-0 bottom-0 w-8 bg-gradient-to-r from-[#0f1117] via-[#1a1e26] to-[#12151c] border-x border-white/5 z-0 flex flex-col py-2 space-y-2 shadow-[inset_10px_0_15px_rgba(0,0,0,0.5)]">
+                                    <div className="absolute right-8 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100 border-x border-slate-200 z-0 flex flex-col py-2 space-y-2 shadow-sm">
                                         {Array.from({ length: totalU }).map((_, i) => (
-                                            <div key={i} className="flex flex-col items-center gap-1 opacity-20">
-                                                <div className="w-1.5 h-1.5 bg-black rounded-sm border border-white/10 shadow-inner"></div>
-                                                <div className="w-1.5 h-1.5 bg-black rounded-sm border border-white/10 shadow-inner"></div>
+                                            <div key={i} className="flex flex-col items-center gap-1 opacity-40">
+                                                <div className="w-1.5 h-1.5 bg-slate-400 rounded-sm border border-slate-300 shadow-inner"></div>
+                                                <div className="w-1.5 h-1.5 bg-slate-400 rounded-sm border border-slate-300 shadow-inner"></div>
                                             </div>
                                         ))}
                                     </div>
@@ -157,9 +157,9 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                                                 key={uNumber}
                                                 onMouseEnter={() => deviceAtU && setHoveredDeviceId(deviceAtU.id)}
                                                 onMouseLeave={() => setHoveredDeviceId(null)}
-                                                className={`h-[22px] w-full border-b border-white/[0.02] flex items-center px-2 relative transition-all ${deviceAtU ? 'bg-blue-900/5' : 'hover:bg-white/[0.02]'}`}
+                                                className={`h-[22px] w-full border-b border-slate-50 flex items-center px-2 relative transition-all ${deviceAtU ? 'bg-blue-50/10' : 'hover:bg-slate-50'}`}
                                             >
-                                                <span className="text-[7px] text-slate-600 font-black absolute left-2 select-none font-mono opacity-50">{uNumber}</span>
+                                                <span className="text-[7px] text-slate-300 font-black absolute left-2 select-none font-mono">{uNumber}</span>
 
                                                 {deviceAtU && isTopMostUnit && (
                                                     <motion.div
@@ -168,7 +168,7 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                                                         animate={{ opacity: 1, x: 0 }}
                                                         style={{ height: `${(deviceAtU.u_height || 1) * 22 - 1}px` }}
                                                         className={`absolute left-8 right-8 top-[0px] z-20 transition-all duration-300 ${isHovered ? 'ring-2 ring-blue-500 z-30 scale-[1.01] shadow-2xl' : 'shadow-lg'}
-                                                bg-gradient-to-b from-[#2a2f3a] to-[#1a1e26] border border-white/10 rounded-sm flex flex-col justify-center px-4 overflow-hidden`}
+                                                bg-gradient-to-b from-slate-50 to-white border border-slate-200 rounded-sm flex flex-col justify-center px-4 overflow-hidden`}
                                                     >
                                                         {/* Brushed Metal Texture Overlay */}
                                                         <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/brushed-alum.png')]"></div>
@@ -178,18 +178,18 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                                                             <div className="flex items-center gap-2 overflow-hidden">
                                                                 <div className={`w-1.5 h-1.5 rounded-full ${getStatusColor()}`}></div>
                                                                 <div className="flex flex-col min-w-0">
-                                                                    <span className="text-[8px] font-black text-white/90 truncate uppercase tracking-tighter leading-none">
+                                                                    <span className="text-[8px] font-black text-slate-900 truncate uppercase tracking-tighter leading-none">
                                                                         {deviceAtU.fabricante}
                                                                     </span>
-                                                                    <span className="text-[7px] text-blue-400 font-black truncate uppercase tracking-widest leading-none mt-0.5">
+                                                                    <span className="text-[7px] text-blue-600 font-black truncate uppercase tracking-widest leading-none mt-0.5">
                                                                         {deviceAtU.modelo}
                                                                     </span>
                                                                 </div>
                                                             </div>
                                                             {!isCompact && (
-                                                                <div className="flex gap-1 opacity-20">
-                                                                    <div className="w-3 h-3 border border-white/20 rounded-sm"></div>
-                                                                    <div className="w-3 h-3 border border-white/20 rounded-sm"></div>
+                                                                <div className="flex gap-1 opacity-10">
+                                                                    <div className="w-3 h-3 border border-slate-900 rounded-sm"></div>
+                                                                    <div className="w-3 h-3 border border-slate-900 rounded-sm"></div>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -216,11 +216,11 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                 {/* Hardware Inventory Details */}
                 {!isCompact && (
                     <div className="flex-1 flex flex-col gap-6 overflow-hidden">
-                        <div className="flex justify-between items-center bg-[#1a1e26] p-4 rounded-xl border border-white/5 shadow-inner">
-                            <h4 className="text-[10px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
-                                <HardDrive size={18} className="text-blue-500" />
+                        <div className="flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.3em] flex items-center gap-3">
+                                <HardDrive size={18} className="text-blue-600" />
                                 Hardware Map Registry
-                                <span className="ml-2 px-3 py-1 bg-blue-500/10 rounded-full text-[9px] text-blue-400 border border-blue-500/20">{sortedDevices.length} ACTIVE UNITS</span>
+                                <span className="ml-2 px-3 py-1 bg-blue-600 text-[9px] text-white rounded-full font-bold">{sortedDevices.length} ACTIVE UNITS</span>
                             </h4>
                         </div>
 
@@ -235,35 +235,35 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                                         onMouseLeave={() => setHoveredDeviceId(null)}
                                         initial={{ opacity: 0, x: 20 }}
                                         animate={{ opacity: 1, x: 0 }}
-                                        className={`p-6 transition-all duration-300 relative overflow-hidden rounded-2xl border ${isHovered ? 'bg-blue-600/10 border-blue-500/50 scale-[1.01] shadow-2xl' : 'bg-[#1a1e26]/40 border-white/5 hover:border-white/10'}`}
+                                        className={`p-6 transition-all duration-300 relative overflow-hidden rounded-2xl border ${isHovered ? 'bg-blue-50 border-blue-200 scale-[1.01] shadow-lg' : 'bg-white border-slate-100 hover:border-slate-200 shadow-sm'}`}
                                     >
                                         <div className="flex justify-between items-start relative z-10">
                                             <div className="flex-1 space-y-6">
                                                 <div className="flex items-center gap-5">
-                                                    <div className={`flex flex-col items-center justify-center w-14 h-14 rounded-2xl border shadow-2xl transition-all ${isHovered ? 'bg-blue-500 border-blue-400 text-white' : 'bg-slate-900 border-white/10 text-slate-500'}`}>
+                                                    <div className={`flex flex-col items-center justify-center w-14 h-14 rounded-2xl border shadow-sm transition-all ${isHovered ? 'bg-blue-600 border-blue-500 text-white' : 'bg-slate-50 border-slate-200 text-slate-400'}`}>
                                                         <span className="text-[8px] font-black uppercase tracking-widest leading-none mb-1 opacity-60">Pos</span>
                                                         <span className="text-xl font-black font-mono leading-none">{dev.u_position}</span>
                                                     </div>
                                                     <div>
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-[9px] font-black text-blue-500 uppercase tracking-[0.2em]">{dev.type}</span>
-                                                            <div className="w-1 h-1 bg-slate-700 rounded-full"></div>
-                                                            <span className="px-2 py-0.5 bg-slate-800 text-[8px] text-slate-400 font-black rounded uppercase border border-white/5">{dev.u_height}U SIZE</span>
+                                                            <span className="text-[9px] font-black text-blue-600 uppercase tracking-[0.2em]">{dev.type}</span>
+                                                            <div className="w-1 h-1 bg-slate-200 rounded-full"></div>
+                                                            <span className="px-2 py-0.5 bg-slate-100 text-[8px] text-slate-500 font-black rounded uppercase border border-slate-200">{dev.u_height}U SIZE</span>
                                                         </div>
-                                                        <h5 className="text-2xl font-black text-white mt-1 tracking-tight">
-                                                            {dev.fabricante} <span className="text-blue-200/40 uppercase">{dev.modelo}</span>
+                                                        <h5 className="text-2xl font-black text-slate-900 mt-1 tracking-tight">
+                                                            {dev.fabricante} <span className="text-slate-400 uppercase font-medium">{dev.modelo}</span>
                                                         </h5>
                                                     </div>
                                                 </div>
 
                                                 <div className="grid grid-cols-3 gap-8">
                                                     {[
-                                                        { icon: Hash, label: 'Serial / P.N.', value: dev.serie || 'SECURED_ID', color: 'text-slate-300' },
-                                                        { icon: Activity, label: 'Management IP', value: dev.ip_gestion || 'ISOLATED', color: 'text-emerald-400' },
-                                                        { icon: Zap, label: 'Power Draw', value: dev.watts ? `${dev.watts} W` : '0W', color: 'text-yellow-400' }
+                                                        { icon: Hash, label: 'Serial / P.N.', value: dev.serie || 'SECURED_ID', color: 'text-slate-600' },
+                                                        { icon: Activity, label: 'Management IP', value: dev.ip_gestion || 'ISOLATED', color: 'text-emerald-600' },
+                                                        { icon: Zap, label: 'Power Draw', value: dev.watts ? `${dev.watts} W` : '0W', color: 'text-amber-600' }
                                                     ].map((item, idx) => (
                                                         <div key={idx} className="space-y-2">
-                                                            <p className="text-[8px] text-slate-500 uppercase font-black tracking-[0.2em] flex items-center gap-1.5 opacity-60">
+                                                            <p className="text-[8px] text-slate-400 uppercase font-black tracking-[0.2em] flex items-center gap-1.5 opacity-80">
                                                                 <item.icon size={10} strokeWidth={3} /> {item.label}
                                                             </p>
                                                             <p className={`text-xs font-black font-mono tracking-tighter ${item.color}`}>{item.value}</p>
@@ -273,28 +273,28 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
 
                                                 <div className="flex flex-wrap gap-2 pt-4">
                                                     {dev.owner && (
-                                                        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/5">
-                                                            <User size={12} className="text-blue-500" />
-                                                            <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{dev.owner}</span>
+                                                        <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-100">
+                                                            <User size={12} className="text-blue-600" />
+                                                            <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{dev.owner}</span>
                                                         </div>
                                                     )}
                                                     {dev.contrato && (
-                                                        <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/5 rounded-lg border border-emerald-500/10">
-                                                            <Shield size={12} className="text-emerald-500" />
-                                                            <span className="text-[9px] font-black text-emerald-300 uppercase tracking-widest">{dev.contrato}</span>
+                                                        <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-lg border border-emerald-100">
+                                                            <Shield size={12} className="text-emerald-600" />
+                                                            <span className="text-[9px] font-black text-emerald-700 uppercase tracking-widest">{dev.contrato}</span>
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            <div className={`p-4 rounded-3xl border transition-all duration-500 ${isHovered ? 'bg-blue-600 text-white shadow-[0_0_30px_rgba(37,99,235,0.4)]' : 'bg-slate-900 border-white/5 text-slate-500'}`}>
+                                            <div className={`p-4 rounded-3xl border transition-all duration-500 ${isHovered ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-50 border-slate-200 text-slate-400'}`}>
                                                 <DevIcon size={32} strokeWidth={2.5} />
                                             </div>
                                         </div>
 
                                         {dev.comentarios && (
-                                            <div className="mt-6 p-4 bg-black/40 rounded-2xl border-l-4 border-blue-500/40 text-[10px] font-bold text-slate-400 uppercase tracking-wide leading-relaxed">
-                                                <AlertCircle size={10} className="inline mr-2 text-blue-500" />
+                                            <div className="mt-6 p-4 bg-slate-50 rounded-2xl border-l-4 border-blue-500/50 text-[10px] font-bold text-slate-500 uppercase tracking-wide leading-relaxed">
+                                                <AlertCircle size={10} className="inline mr-2 text-blue-600" />
                                                 "{dev.comentarios}"
                                             </div>
                                         )}

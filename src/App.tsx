@@ -238,8 +238,8 @@ function App() {
 
     if (authLoading) {
         return (
-            <div className="min-h-screen bg-[#05070a] flex items-center justify-center">
-                <div className="w-10 h-10 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+                <div className="w-10 h-10 border-4 border-blue-600/10 border-t-blue-600 rounded-full animate-spin" />
             </div>
         )
     }
@@ -249,13 +249,13 @@ function App() {
     }
 
     return (
-        <div className="premium-bg flex h-screen overflow-hidden text-slate-200">
+        <div className="premium-bg flex h-screen overflow-hidden text-slate-900">
             {/* Sidebar... */}
             {/* Sidebar */}
-            <aside className="w-64 glass-card m-4 p-6 flex flex-col gap-8">
+            <aside className="w-64 glass-card m-4 p-6 flex flex-col gap-8 bg-white/80 border-slate-200/60 shadow-xl shadow-slate-200/40">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-blue-900/40">DC</div>
-                    <h1 className="text-xl font-bold tracking-tight text-white">AssetManager</h1>
+                    <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-blue-200">DC</div>
+                    <h1 className="text-xl font-bold tracking-tight text-slate-900">AssetManager</h1>
                 </div>
 
                 <nav className="flex flex-col gap-2">
@@ -277,10 +277,10 @@ function App() {
                                     setViewingSala(null);
                                 }
                             }}
-                            className={`flex items - center gap - 3 px - 4 py - 3 rounded - xl transition - all ${activeTab === item.id
-                                ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                                : 'hover:bg-white/5 text-slate-400 hover:text-white'
-                                } `}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${activeTab === item.id
+                                ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                                : 'hover:bg-slate-100 text-slate-500 hover:text-slate-900'
+                                }`}
                         >
                             <item.icon size={20} />
                             <span className="font-medium">{item.label}</span>
@@ -288,10 +288,10 @@ function App() {
                     ))}
                 </nav>
 
-                <div className="mt-auto pt-6 border-t border-white/5">
+                <div className="mt-auto pt-6 border-t border-slate-100">
                     <button
                         onClick={() => supabase.auth.signOut()}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition-all border border-transparent hover:border-red-500/20"
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-50 text-slate-500 hover:text-red-600 transition-all border border-transparent hover:border-red-100"
                     >
                         <X size={20} />
                         <span className="font-medium uppercase tracking-widest text-xs">Cerrar Sesión</span>
@@ -303,8 +303,8 @@ function App() {
             <main className="flex-1 p-8 overflow-auto flex flex-col">
                 <header className="mb-8 flex justify-between items-center">
                     <div>
-                        <h2 className="text-3xl font-bold capitalize text-white">{activeTab}</h2>
-                        <p className="text-slate-400 mt-1">Gestión avanzada de activos de centro de datos</p>
+                        <h2 className="text-3xl font-bold capitalize text-slate-900">{activeTab}</h2>
+                        <p className="text-slate-500 mt-1">Gestión avanzada de activos de centro de datos</p>
                     </div>
 
                     <div className="flex items-center gap-8">
@@ -314,7 +314,7 @@ function App() {
                                 <>
                                     <button
                                         onClick={downloadTemplate}
-                                        className="px-4 py-2.5 glass-card bg-white/5 border-white/10 hover:bg-white/10 text-slate-300 hover:text-white transition-all flex items-center gap-2"
+                                        className="px-4 py-2.5 glass-card bg-white border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-all flex items-center gap-2 shadow-sm"
                                     >
                                         <Download size={18} />
                                         Plantilla
@@ -322,7 +322,7 @@ function App() {
                                     <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".xlsx, .xls" className="hidden" />
                                     <button
                                         onClick={() => fileInputRef.current?.click()}
-                                        className="px-6 py-2.5 glass-card bg-blue-600/20 border-blue-500/30 hover:bg-blue-600/30 text-blue-400 font-semibold transition-all flex items-center gap-2"
+                                        className="px-6 py-2.5 glass-card bg-blue-600 border-blue-600 hover:bg-blue-700 text-white font-semibold transition-all flex items-center gap-2 shadow-lg shadow-blue-200"
                                     >
                                         <FileSpreadsheet size={18} />
                                         Importar
@@ -331,8 +331,8 @@ function App() {
                                         onClick={handleSaveInventory}
                                         disabled={isSaving}
                                         className={`px-6 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg ${saveStatus === 'saved'
-                                            ? 'bg-green-600 text-white shadow-green-900/20'
-                                            : 'bg-white/5 glass-card border-white/10 hover:bg-white/10 text-white'
+                                            ? 'bg-emerald-600 text-white shadow-emerald-200'
+                                            : 'bg-white glass-card border-slate-200 hover:bg-slate-50 text-slate-700'
                                             }`}
                                     >
                                         {saveStatus === 'saving' ? (
@@ -347,7 +347,7 @@ function App() {
                                             </>
                                         ) : (
                                             <>
-                                                <Save size={18} className="text-blue-400" />
+                                                <Save size={18} className="text-blue-600" />
                                                 Guardar
                                             </>
                                         )}
@@ -362,12 +362,12 @@ function App() {
                     {activeTab === 'dashboard' && (
                         <>
                             <div className="flex justify-between items-center mb-2">
-                                <div className="flex items-center gap-4 bg-white/5 p-2 rounded-xl border border-white/10">
-                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest px-2">Filtrar por Sitio:</span>
+                                <div className="flex items-center gap-4 bg-white p-2 rounded-xl border border-slate-200 shadow-sm">
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2">Filtrar por Sitio:</span>
                                     <select
                                         value={selectedSite}
                                         onChange={(e) => setSelectedSite(e.target.value)}
-                                        className="bg-slate-900 border-none rounded-lg px-4 py-2 text-sm text-blue-400 font-bold outline-none cursor-pointer focus:ring-2 focus:ring-blue-500/50 transition-all"
+                                        className="bg-slate-50 border-none rounded-lg px-4 py-2 text-sm text-blue-600 font-bold outline-none cursor-pointer focus:ring-2 focus:ring-blue-500/20 transition-all"
                                     >
                                         <option value="all">Todos los Sitios</option>
                                         {availableSites.map(site => (
@@ -376,7 +376,7 @@ function App() {
                                     </select>
                                 </div>
                                 <div className="text-xs text-slate-500 font-mono">
-                                    Mostrando <span className="text-blue-400 font-bold">{stats.totalRacks}</span> de <span className="text-white">{assets.length}</span> racks
+                                    Mostrando <span className="text-blue-600 font-bold">{stats.totalRacks}</span> de <span className="text-slate-900">{assets.length}</span> racks
                                 </div>
                             </div>
 
@@ -384,16 +384,16 @@ function App() {
                                 {[
                                     { label: 'Total Racks', value: stats.totalRacks.toString(), icon: Box, color: 'blue' },
                                     { label: 'Consumo Total', value: `${stats.totalWatts.toFixed(2)} KW`, icon: Zap, color: 'blue' },
-                                    { label: 'Ocupación Global', value: `${stats.usagePercent}% `, icon: Activity, color: 'blue' },
-                                    { label: 'UR Libres Site', value: `${(stats.totalRacks * U_TOTAL - stats.filteredAssets.reduce((a, r) => a + r.devices.reduce((d, dv) => d + dv.u_height!, 0), 0))} UR`, icon: Database, color: 'green' },
+                                    { label: 'Ocupación Global', value: `${stats.usagePercent}%`, icon: Activity, color: 'blue' },
+                                    { label: 'UR Libres Site', value: `${(stats.totalRacks * U_TOTAL - stats.filteredAssets.reduce((a, r) => a + r.devices.reduce((d, dv) => d + dv.u_height!, 0), 0))} UR`, icon: Database, color: 'emerald' },
                                 ].map((stat) => (
-                                    <div key={stat.label} className="p-6 glass-card border-white/5 flex items-center gap-4">
-                                        <div className={`w - 12 h - 12 bg - ${stat.color} -600 / 20 rounded - xl flex items - center justify - center text - ${stat.color} -400`}>
+                                    <div key={stat.label} className="p-6 glass-card bg-white border-slate-200/60 flex items-center gap-4">
+                                        <div className={`w-12 h-12 ${stat.color === 'blue' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'} rounded-xl flex items-center justify-center`}>
                                             <stat.icon size={24} />
                                         </div>
                                         <div>
-                                            <p className="text-slate-400 text-xs uppercase tracking-widest font-bold">{stat.label}</p>
-                                            <p className="text-2xl font-bold text-white">{stat.value}</p>
+                                            <p className="text-slate-500 text-xs uppercase tracking-widest font-bold">{stat.label}</p>
+                                            <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -402,15 +402,15 @@ function App() {
 
                             <div className="flex gap-6 flex-1 min-h-0">
                                 {/* Room Breakdown - First on the left */}
-                                <div className="glass-card p-6 border-white/5 overflow-hidden flex flex-col w-[25%]">
-                                    <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                        <MapIcon className="text-blue-500" size={18} />
+                                <div className="glass-card p-6 bg-white border-slate-200/60 overflow-hidden flex flex-col w-[25%] shadow-sm">
+                                    <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                        <MapIcon className="text-blue-600" size={18} />
                                         Resumen por Sala
                                     </h3>
                                     <div className="overflow-auto flex-1">
                                         <table className="w-full text-left">
-                                            <thead className="text-slate-500 text-[9px] uppercase tracking-[0.15em]">
-                                                <tr className="border-b border-white/5">
+                                            <thead className="text-slate-400 text-[9px] uppercase tracking-[0.15em]">
+                                                <tr className="border-b border-slate-100">
                                                     <th className="pb-3 px-2">Sala</th>
                                                     <th className="pb-3 px-2">Racks</th>
                                                     <th className="pb-3 px-2 text-right">Uso %</th>
@@ -419,17 +419,17 @@ function App() {
                                                     <th className="pb-3 px-2 text-right">Detalle</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-white/5">
+                                            <tbody className="divide-y divide-slate-50">
                                                 {stats.salaBreakdown.map((sala) => {
                                                     const uPercent = ((sala.usedU / sala.totalU) * 100).toFixed(1)
                                                     const availU = sala.totalU - sala.usedU
                                                     return (
-                                                        <tr key={sala.name} className="hover:bg-white/5 transition-colors">
-                                                            <td className="py-3 px-2 font-bold text-white text-sm">{sala.name}</td>
-                                                            <td className="py-3 px-2 text-slate-400 text-xs">{sala.racks}</td>
-                                                            <td className="py-3 px-2 text-right text-blue-400 font-mono font-bold text-xs">{uPercent}%</td>
-                                                            <td className="py-3 px-2 text-right text-green-400 font-mono text-xs">{availU} UR</td>
-                                                            <td className="py-3 px-2 text-right text-white font-mono text-xs">{sala.consumption.toFixed(2)} KW</td>
+                                                        <tr key={sala.name} className="hover:bg-slate-50 transition-colors">
+                                                            <td className="py-3 px-2 font-bold text-slate-900 text-sm">{sala.name}</td>
+                                                            <td className="py-3 px-2 text-slate-500 text-xs">{sala.racks}</td>
+                                                            <td className="py-3 px-2 text-right text-blue-600 font-mono font-bold text-xs">{uPercent}%</td>
+                                                            <td className="py-3 px-2 text-right text-emerald-600 font-mono text-xs">{availU} UR</td>
+                                                            <td className="py-3 px-2 text-right text-slate-700 font-mono text-xs">{sala.consumption.toFixed(2)} KW</td>
                                                             <td className="py-3 px-2 text-right">
                                                                 <select
                                                                     onChange={(e) => {
@@ -437,8 +437,8 @@ function App() {
                                                                         const rack = assets.find(a => a.id === rackId);
                                                                         if (rack) openRackDetail(rack);
                                                                     }}
-                                                                    className="bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-[9px] text-blue-400 font-bold outline-none cursor-pointer hover:border-blue-500/50 transition-all appearance-none pr-6 relative"
-                                                                    style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%2360a5fa\' stroke-width=\'3\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpath d=\'m6 9 6 6 6-6\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 4px center' }}
+                                                                    className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[9px] text-blue-600 font-bold outline-none cursor-pointer hover:border-blue-400/50 transition-all appearance-none pr-6 relative"
+                                                                    style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%232563eb\' stroke-width=\'3\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpath d=\'m6 9 6 6 6-6\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 4px center' }}
                                                                 >
                                                                     <option value="">Sel...</option>
                                                                     {stats.filteredAssets.filter(a => (a.sala || 'Desconocida') === sala.name).map(r => (
@@ -457,31 +457,31 @@ function App() {
                                 {/* Interactive Capacity Monitor & Live Preview */}
                                 <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
                                     {/* Left: Capacity Monitor */}
-                                    <div className="glass-card p-6 border-white/5 flex-[3] flex flex-col min-h-0 bg-slate-900/40">
+                                    <div className="glass-card p-6 bg-white border-slate-200/60 flex-[3] flex flex-col min-h-0 shadow-sm">
                                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                                             <div>
-                                                <h3 className="text-sm font-black text-white flex items-center gap-3 uppercase tracking-[0.3em]">
-                                                    <Activity className="text-blue-500" size={18} />
+                                                <h3 className="text-sm font-black text-slate-900 flex items-center gap-3 uppercase tracking-[0.3em]">
+                                                    <Activity className="text-blue-600" size={18} />
                                                     Inventory Analytics
                                                 </h3>
-                                                <p className="text-[9px] text-slate-500 font-bold uppercase mt-1 tracking-widest opacity-60">Real-time status monitor per unit</p>
+                                                <p className="text-[9px] text-slate-400 font-bold uppercase mt-1 tracking-widest opacity-60">Real-time status monitor per unit</p>
                                             </div>
 
                                             <div className="flex items-center gap-3 w-full md:w-auto">
                                                 <div className="relative flex-1 md:w-56">
-                                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+                                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                                                     <input
                                                         type="text"
                                                         placeholder="Quick Search..."
                                                         value={dashboardSearch}
                                                         onChange={(e) => setDashboardSearch(e.target.value)}
-                                                        className="w-full bg-black/40 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-xs text-white placeholder:text-slate-600 focus:border-blue-500/50 outline-none transition-all font-mono"
+                                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-9 pr-4 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-500/50 outline-none transition-all font-mono"
                                                     />
                                                 </div>
                                                 <select
                                                     value={dashboardSort}
                                                     onChange={(e) => setDashboardSort(e.target.value as any)}
-                                                    className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-[10px] text-blue-400 font-black outline-none cursor-pointer hover:border-blue-500/50 transition-all uppercase tracking-tighter font-mono"
+                                                    className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-[10px] text-blue-600 font-black outline-none cursor-pointer hover:border-blue-400/50 transition-all uppercase tracking-tighter font-mono shadow-sm"
                                                 >
                                                     <option value="id">SORT: ID</option>
                                                     <option value="usage">SORT: USAGE</option>
@@ -509,8 +509,8 @@ function App() {
                                                 .map((rack) => {
                                                     const usedU = rack.devices.reduce((acc, d) => acc + (d.u_height || 1), 0);
                                                     const uPercent = (usedU / U_TOTAL) * 100;
-                                                    const statusColor = rack.estado?.toUpperCase() === 'OPERATIVO' ? 'from-emerald-500 to-emerald-700' :
-                                                        rack.estado?.toUpperCase() === 'VACIO' ? 'from-slate-600 to-slate-800' : 'from-yellow-400 to-orange-500';
+                                                    const statusColor = rack.estado?.toUpperCase() === 'OPERATIVO' ? 'from-emerald-500 to-emerald-600' :
+                                                        rack.estado?.toUpperCase() === 'VACIO' ? 'from-slate-200 to-slate-300' : 'from-yellow-400 to-orange-400';
 
                                                     const isAlert = uPercent > 90 || rack.alarm_hardware === 1;
                                                     const isSelected = dashboardSelectedRack?.id === rack.id;
@@ -520,33 +520,33 @@ function App() {
                                                             key={rack.id}
                                                             whileHover={{ y: -4, scale: 1.02 }}
                                                             onClick={() => setDashboardSelectedRack(rack)}
-                                                            className={`group relative flex flex-col bg-slate-900 border ${isSelected ? 'border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]' : isAlert ? 'border-red-500/30' : 'border-white/5'} hover:border-blue-500/50 rounded-xl p-3 transition-all cursor-pointer overflow-hidden`}
+                                                            className={`group relative flex flex-col bg-white border ${isSelected ? 'border-blue-500 shadow-[0_4px_20px_rgba(59,130,246,0.15)]' : isAlert ? 'border-red-500/30' : 'border-slate-100'} hover:border-blue-400/50 rounded-xl p-3 transition-all cursor-pointer overflow-hidden shadow-sm`}
                                                         >
                                                             {isAlert && <div className="absolute top-0 right-0 w-8 h-8 bg-red-500/10 rounded-bl-3xl flex items-start justify-end p-1"><AlertTriangle size={12} className="text-red-500 animate-pulse" /></div>}
 
                                                             <div className="flex justify-between items-start mb-3">
                                                                 <div className="flex flex-col">
-                                                                    <span className={`text-[11px] font-black font-mono tracking-tighter ${isSelected ? 'text-blue-400' : 'text-white'} group-hover:text-blue-400 transition-colors`}>{rack.tag_id}</span>
-                                                                    <span className="text-[7px] text-slate-600 font-black uppercase tracking-tight">{rack.sala}</span>
+                                                                    <span className={`text-[11px] font-black font-mono tracking-tighter ${isSelected ? 'text-blue-600' : 'text-slate-900'} group-hover:text-blue-600 transition-colors`}>{rack.tag_id}</span>
+                                                                    <span className="text-[7px] text-slate-400 font-black uppercase tracking-tight">{rack.sala}</span>
                                                                 </div>
-                                                                <span className={`w-1.5 h-1.5 rounded-full ${rack.estado?.toUpperCase() === 'OPERATIVO' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.5)]'}`}></span>
+                                                                <span className={`w-1.5 h-1.5 rounded-full ${rack.estado?.toUpperCase() === 'OPERATIVO' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]' : 'bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.3)]'}`}></span>
                                                             </div>
 
                                                             <div className="flex-1 flex gap-2 items-end">
                                                                 {/* Modern Vertical Gauge */}
-                                                                <div className="w-2.5 h-16 bg-black/40 rounded-full border border-white/5 p-0.5 overflow-hidden flex flex-col-reverse relative shadow-inner">
+                                                                <div className="w-2.5 h-16 bg-slate-50 rounded-full border border-slate-100 p-0.5 overflow-hidden flex flex-col-reverse relative shadow-inner">
                                                                     <motion.div
                                                                         initial={{ height: 0 }}
                                                                         animate={{ height: `${uPercent}%` }}
-                                                                        className={`w-full rounded-full bg-gradient-to-t ${statusColor} shadow-lg`}
+                                                                        className={`w-full rounded-full bg-gradient-to-t ${statusColor} shadow-sm`}
                                                                     />
                                                                 </div>
 
                                                                 <div className="flex-1 flex flex-col justify-end">
-                                                                    <p className="text-[14px] font-black text-white leading-none font-mono">
-                                                                        {uPercent.toFixed(0)}<span className="text-[8px] text-blue-500 ml-0.5">%</span>
+                                                                    <p className="text-[14px] font-black text-slate-900 leading-none font-mono">
+                                                                        {uPercent.toFixed(0)}<span className="text-[8px] text-blue-600 ml-0.5">%</span>
                                                                     </p>
-                                                                    <p className="text-[7px] text-slate-600 font-black uppercase mt-1">OCCUPANCY</p>
+                                                                    <p className="text-[7px] text-slate-400 font-black uppercase mt-1">OCCUPANCY</p>
                                                                 </div>
                                                             </div>
                                                         </motion.div>
@@ -556,19 +556,19 @@ function App() {
                                     </div>
 
                                     {/* Right: Live Industrial Preview */}
-                                    <div className="glass-card p-6 border-white/5 w-full lg:w-[380px] flex flex-col min-h-0 bg-slate-900 shadow-2xl relative overflow-hidden group/preview">
+                                    <div className="glass-card p-6 bg-white border-slate-200/60 w-full lg:w-[380px] flex flex-col min-h-0 shadow-2xl relative overflow-hidden group/preview">
                                         {/* Background Decor */}
-                                        <div className="absolute inset-0 bg-gradient-to-b from-blue-600/[0.03] to-transparent pointer-events-none"></div>
+                                        <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-transparent pointer-events-none"></div>
 
                                         <div className="flex justify-between items-center mb-6 relative z-10">
-                                            <h4 className="text-[10px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
-                                                <Box size={16} className="text-blue-500" />
+                                            <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.3em] flex items-center gap-3">
+                                                <Box size={16} className="text-blue-600" />
                                                 Visual Digital Twin
                                             </h4>
                                             {dashboardSelectedRack && (
                                                 <button
                                                     onClick={() => openRackDetail(dashboardSelectedRack)}
-                                                    className="p-2 hover:bg-white/5 rounded-lg text-blue-400 hover:text-blue-300 transition-colors"
+                                                    className="p-2 hover:bg-slate-50 rounded-lg text-blue-600 hover:text-blue-700 transition-colors border border-slate-100"
                                                     title="Open Detailed View"
                                                 >
                                                     <Activity size={16} />
@@ -579,14 +579,14 @@ function App() {
                                         <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative z-10">
                                             {dashboardSelectedRack ? (
                                                 <div className="h-full flex flex-col mt-2">
-                                                    <div className="mb-4 p-3 bg-black/40 rounded-xl border border-white/5 flex justify-between items-center">
+                                                    <div className="mb-4 p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
                                                         <div>
-                                                            <p className="text-[8px] text-slate-500 font-black uppercase tracking-widest">Active Selector</p>
-                                                            <p className="text-lg font-black text-white tracking-tighter uppercase font-mono">{dashboardSelectedRack.tag_id}</p>
+                                                            <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest">Active Selector</p>
+                                                            <p className="text-lg font-black text-slate-900 tracking-tighter uppercase font-mono">{dashboardSelectedRack.tag_id}</p>
                                                         </div>
                                                         <div className="text-right">
-                                                            <p className="text-[8px] text-slate-500 font-black uppercase tracking-widest text-right">Site</p>
-                                                            <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">{dashboardSelectedRack.sitio}</p>
+                                                            <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest text-right">Site</p>
+                                                            <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">{dashboardSelectedRack.sitio}</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex-1 overflow-hidden scale-[0.9] origin-top">
@@ -595,12 +595,12 @@ function App() {
                                                 </div>
                                             ) : (
                                                 <div className="flex-1 flex flex-col items-center justify-center text-center p-10 space-y-4 opacity-30 group-hover/preview:opacity-50 transition-opacity">
-                                                    <div className="w-16 h-16 rounded-3xl border-2 border-dashed border-white/20 flex items-center justify-center">
+                                                    <div className="w-16 h-16 rounded-3xl border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300">
                                                         <Box size={32} />
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-black text-white uppercase tracking-widest">No Selection</p>
-                                                        <p className="text-[9px] text-slate-500 font-bold uppercase mt-1 leading-loose">Select a rack from the capacity monitor to initialize the digital twin projection</p>
+                                                        <p className="text-xs font-black text-slate-900 uppercase tracking-widest">No Selection</p>
+                                                        <p className="text-[9px] text-slate-400 font-bold uppercase mt-1 leading-loose">Select a rack from the capacity monitor to initialize the digital twin projection</p>
                                                     </div>
                                                 </div>
                                             )}
@@ -614,10 +614,10 @@ function App() {
                     {activeTab === 'inventory' && (
                         <div className="flex-1 overflow-hidden flex flex-col gap-6">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
-                                <section className="glass-card flex-1 p-8 border-white/5 overflow-hidden flex flex-col">
+                                <section className="glass-card bg-white border-slate-200/60 flex-1 p-8 overflow-hidden flex flex-col shadow-sm">
                                     <div className="flex justify-between items-center mb-6">
-                                        <h3 className="text-xl font-bold text-white flex items-center gap-3">
-                                            <Database className="text-blue-500" />
+                                        <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                                            <Database className="text-blue-600" />
                                             Lista de Activos
                                         </h3>
                                         {assets.length > 0 && (
@@ -632,7 +632,7 @@ function App() {
                                     </div>
                                     <div className="overflow-auto flex-1">
                                         <table className="w-full text-left">
-                                            <thead className="bg-white/5 text-slate-400 text-xs uppercase tracking-widest sticky top-0">
+                                            <thead className="bg-slate-50 text-slate-400 text-xs uppercase tracking-widest sticky top-0">
                                                 <tr>
                                                     <th className="pb-4 px-4">Tag ID</th>
                                                     <th className="pb-4 px-4">Sitio</th>
@@ -642,21 +642,21 @@ function App() {
                                                     <th className="pb-4 px-4">Acciones</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-white/5">
+                                            <tbody className="divide-y divide-slate-50">
                                                 {assets.map((asset) => {
                                                     const isSelected = selectedRack?.id === asset.id;
                                                     return (
                                                         <tr
                                                             key={asset.id}
                                                             onClick={() => setSelectedRack(asset)}
-                                                            className={`transition-colors group cursor-pointer ${isSelected ? 'bg-blue-600/10 border-l-4 border-l-blue-500' : 'hover:bg-white/5 border-l-4 border-l-transparent'}`}
+                                                            className={`transition-colors group cursor-pointer ${isSelected ? 'bg-blue-50 border-l-4 border-l-blue-600' : 'hover:bg-slate-50 border-l-4 border-l-transparent'}`}
                                                         >
-                                                            <td className={`py-5 px-4 font-bold font-mono ${isSelected ? 'text-blue-400' : 'text-white'}`}>{asset.tag_id}</td>
-                                                            <td className="py-5 px-4 text-slate-400 font-bold text-xs">{asset.sitio || 'N/A'}</td>
-                                                            <td className="py-5 px-4 text-slate-400">{asset.fabricante}</td>
-                                                            <td className="py-5 px-4 text-slate-400">{asset.modelo}</td>
+                                                            <td className={`py-5 px-4 font-bold font-mono ${isSelected ? 'text-blue-600' : 'text-slate-900'}`}>{asset.tag_id}</td>
+                                                            <td className="py-5 px-4 text-slate-500 font-bold text-xs">{asset.sitio || 'N/A'}</td>
+                                                            <td className="py-5 px-4 text-slate-500">{asset.fabricante}</td>
+                                                            <td className="py-5 px-4 text-slate-500">{asset.modelo}</td>
                                                             <td className="py-5 px-4">
-                                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${isSelected ? 'bg-blue-600/20 text-blue-300' : 'bg-blue-600/10 text-blue-400'}`}>
+                                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${isSelected ? 'bg-blue-100 text-blue-700' : 'bg-blue-50 text-blue-600'}`}>
                                                                     {asset.devices.length} Units
                                                                 </span>
                                                             </td>
@@ -684,10 +684,10 @@ function App() {
                                             <RackLayout rack={selectedRack} hideHeader={true} />
                                         </div>
                                     ) : (
-                                        <div className="flex-1 glass-card border-white/5 flex flex-col items-center justify-center text-slate-500 border-dashed border-2 bg-slate-900/40">
-                                            <Box size={48} className="mb-4 opacity-10" />
-                                            <p className="font-black text-[10px] uppercase tracking-[0.3em]">Select a rack unit</p>
-                                            <p className="text-[9px] text-slate-600 uppercase mt-2 tracking-widest font-bold">To initialize the hardware registry map</p>
+                                        <div className="flex-1 glass-card bg-white border-slate-200/60 flex flex-col items-center justify-center text-slate-300 border-dashed border-2">
+                                            <Box size={48} className="mb-4 opacity-20" />
+                                            <p className="font-black text-[10px] uppercase tracking-[0.3em] text-slate-500">Select a rack unit</p>
+                                            <p className="text-[9px] text-slate-400 uppercase mt-2 tracking-widest font-bold">To initialize the hardware registry map</p>
                                         </div>
                                     )}
                                 </div>
@@ -701,16 +701,16 @@ function App() {
                             <div className="flex items-center gap-3 mb-2">
                                 <button
                                     onClick={() => { setViewingSite(null); setViewingSala(null); setSelectedRack(null); }}
-                                    className={`px - 3 py - 1.5 rounded - lg text - xs font - bold transition - all ${!viewingSite ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-500 hover:text-white hover:bg-white/5'} `}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${!viewingSite ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'} `}
                                 >
                                     SITIOS
                                 </button>
                                 {viewingSite && (
                                     <>
-                                        <span className="text-slate-600">/</span>
+                                        <span className="text-slate-300">/</span>
                                         <button
                                             onClick={() => { setViewingSala(null); setSelectedRack(null); }}
-                                            className={`px - 3 py - 1.5 rounded - lg text - xs font - bold transition - all ${viewingSite && !viewingSala ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-slate-500 hover:text-white hover:bg-white/5'} `}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${viewingSite && !viewingSala ? 'bg-blue-50 text-blue-600 border border-blue-200' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'} `}
                                         >
                                             {viewingSite}
                                         </button>
@@ -718,8 +718,8 @@ function App() {
                                 )}
                                 {viewingSala && (
                                     <>
-                                        <span className="text-slate-600">/</span>
-                                        <span className="px-3 py-1.5 rounded-lg bg-blue-600/20 text-blue-400 border border-blue-500/30 text-xs font-bold uppercase">
+                                        <span className="text-slate-300">/</span>
+                                        <span className="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 text-xs font-bold uppercase">
                                             {viewingSala}
                                         </span>
                                     </>
@@ -734,13 +734,13 @@ function App() {
                                             <button
                                                 key={site}
                                                 onClick={() => setViewingSite(site)}
-                                                className="glass-card p-8 border-white/5 hover:border-blue-500/30 hover:bg-blue-600/5 transition-all flex flex-col items-center gap-4 group"
+                                                className="glass-card p-8 bg-white border-slate-200/60 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex flex-col items-center gap-4 group shadow-sm"
                                             >
-                                                <div className="w-16 h-16 bg-blue-600/10 rounded-2xl flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                                                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
                                                     <MapIcon size={32} />
                                                 </div>
                                                 <div className="text-center">
-                                                    <h4 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors uppercase tracking-widest">{site}</h4>
+                                                    <h4 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors uppercase tracking-widest">{site}</h4>
                                                     <p className="text-slate-500 text-xs mt-2 font-mono">
                                                         {assets.filter(a => a.sitio === site).length} RACKS
                                                     </p>
@@ -748,9 +748,9 @@ function App() {
                                             </button>
                                         ))
                                     ) : (
-                                        <div className="col-span-full glass-card p-12 border-white/5 border-dashed border-2 flex flex-col items-center justify-center text-slate-500">
-                                            <AlertTriangle size={48} className="mb-4 opacity-20" />
-                                            <p className="font-medium text-lg">No hay sitios registrados</p>
+                                        <div className="col-span-full glass-card bg-white p-12 border-slate-200/60 border-dashed border-2 flex flex-col items-center justify-center text-slate-400">
+                                            <AlertTriangle size={48} className="mb-4 opacity-10" />
+                                            <p className="font-medium text-lg text-slate-900">No hay sitios registrados</p>
                                             <p className="text-sm mt-2">Importa un archivo Excel con la columna SITIO para comenzar.</p>
                                         </div>
                                     )}
@@ -762,13 +762,13 @@ function App() {
                                         <button
                                             key={sala}
                                             onClick={() => setViewingSala(sala as string)}
-                                            className="glass-card p-8 border-white/5 hover:border-blue-500/30 hover:bg-blue-600/5 transition-all flex flex-col items-center gap-4 group"
+                                            className="glass-card bg-white p-8 border-slate-200/60 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex flex-col items-center gap-4 group shadow-sm"
                                         >
-                                            <div className="w-16 h-16 bg-blue-600/10 rounded-2xl flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                                            <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
                                                 <Box size={32} />
                                             </div>
                                             <div className="text-center">
-                                                <h4 className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors uppercase tracking-widest">{sala}</h4>
+                                                <h4 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors uppercase tracking-widest">{sala}</h4>
                                                 <p className="text-slate-500 text-xs mt-2 font-mono">
                                                     {assets.filter(a => a.sitio === viewingSite && a.sala === sala).length} RACKS
                                                 </p>
@@ -777,7 +777,7 @@ function App() {
                                     ))}
                                     <button
                                         onClick={() => setViewingSite(null)}
-                                        className="glass-card p-8 border-white/5 border-dashed hover:border-white/20 transition-all flex flex-col items-center justify-center gap-2 text-slate-500 hover:text-white"
+                                        className="glass-card bg-white p-8 border-slate-200/60 border-dashed hover:border-slate-300 transition-all flex flex-col items-center justify-center gap-2 text-slate-400 hover:text-slate-900"
                                     >
                                         <X size={24} />
                                         <span className="text-xs font-bold uppercase tracking-widest">Volver</span>
@@ -796,8 +796,8 @@ function App() {
                                     </div>
 
                                     {!selectedRack && (
-                                        <div className="w-[450px] glass-card flex flex-col items-center justify-center p-8 text-center border-white/5">
-                                            <Box size={48} className="text-slate-700 mb-4 opacity-50" />
+                                        <div className="w-[450px] glass-card bg-white border-slate-200/60 flex flex-col items-center justify-center p-8 text-center shadow-sm">
+                                            <Box size={48} className="text-slate-200 mb-4" />
                                             <h4 className="text-white font-semibold">Ningún Rack seleccionado</h4>
                                             <p className="text-slate-500 text-sm mt-2">
                                                 Visualizando {viewingSite} / {viewingSala}.<br />

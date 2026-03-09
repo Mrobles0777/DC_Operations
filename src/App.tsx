@@ -1,5 +1,6 @@
 import { useRef, useMemo, useState } from 'react'
-import { FileSpreadsheet, Download, Save, Check, X, Box, Menu } from 'lucide-react'
+import { FileSpreadsheet, Download, Save, Check, Box, Menu } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 // Hooks
 import { useAuth } from './hooks/useAuth'
@@ -16,7 +17,7 @@ import { ImportPreviewModal } from './components/ImportPreviewModal'
 import { StatusIndicators } from './components/StatusIndicators'
 
 // Utils
-import { downloadTemplate, RackAsset, U_TOTAL } from './utils/excelUtils'
+import { downloadTemplate, RackAsset } from './utils/excelUtils'
 
 const INITIAL_ASSETS: RackAsset[] = [
     {
@@ -43,6 +44,7 @@ function App() {
     const { user, authLoading, logout, setUser } = useAuth()
     const { 
         assets, 
+        setAssets,
         isSaving, 
         saveStatus, 
         handleSaveInventory, 

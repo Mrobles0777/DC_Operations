@@ -1,4 +1,4 @@
-import { LayoutDashboard, Database, Map as MapIcon, Users, Settings, X, Menu } from 'lucide-react'
+import { LayoutDashboard, Database, Map as MapIcon, Users, Settings, X } from 'lucide-react'
 
 interface SidebarProps {
     activeTab: string

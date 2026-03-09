@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
-import { LayoutDashboard, Database, Map as MapIcon, Box, Activity, Zap, Search, AlertTriangle } from 'lucide-react'
+import { Database, Map as MapIcon, Box, Activity, Zap, Search, AlertTriangle } from 'lucide-react'
 import { RackLayout } from '../RackLayout'
-import { StatusIndicators } from '../StatusIndicators'
 import { RackAsset, U_TOTAL } from '../../utils/excelUtils'
 
 interface DashboardViewProps {

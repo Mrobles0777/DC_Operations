@@ -64,7 +64,7 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
     };
 
     return (
-        <div className={`flex flex-col gap-6 h-full ${!hideHeader ? 'p-8 bg-white border border-slate-200 rounded-2xl shadow-sm' : ''} max-w-7xl mx-auto overflow-hidden`}>
+        <div className={`flex flex-col gap-6 ${!hideHeader ? 'h-full p-8 bg-white border border-slate-200 rounded-2xl shadow-sm' : ''} max-w-7xl mx-auto ${isCompact ? 'overflow-y-auto' : 'overflow-hidden'}`}>
             {!hideHeader && (
                 <div className="flex justify-between items-end pb-6 border-b border-slate-100">
                     <div className="space-y-2">
@@ -102,7 +102,7 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                 </div>
             )}
 
-            <div className={`flex-1 flex ${isCompact ? 'flex-col items-center' : 'flex-col lg:flex-row gap-8 lg:gap-12'} overflow-hidden pt-4`}>
+            <div className={`flex-1 flex ${isCompact ? 'flex-col items-center' : 'flex-col lg:flex-row gap-8 lg:gap-12'} ${isCompact ? 'overflow-visible' : 'overflow-hidden'} pt-2`}>
                 {/* Digital Twin Rack Engine with Isometric Perspective */}
                 <div className="flex flex-col items-center gap-6 group/rack perspective-[2000px] flex-shrink-0">
                     {!isCompact && <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.3em] opacity-60 group-hover/rack:opacity-100 transition-opacity">Digital Twin Engine [Isometric]</p>}

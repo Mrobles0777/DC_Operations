@@ -639,7 +639,7 @@ function App() {
                                                             <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">{dashboardSelectedRack.sitio}</p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex-1 overflow-hidden scale-[0.9] origin-top">
+                                                    <div className="flex-1 overflow-y-auto custom-scrollbar">
                                                         <RackLayout rack={dashboardSelectedRack} hideHeader={true} isCompact={true} />
                                                     </div>
                                                 </div>

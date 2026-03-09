@@ -60,9 +60,20 @@ function App() {
     // Auth persistence
     useEffect(() => {
         // Check active sessions and sets the user
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user ?? null)
+        supabase.auth.getSession().then(({ data: { session }, error }) => {
+            if (error) {
+                console.warn("Session error detected, clearing invalid auth tokens:", error.message);
+                supabase.auth.signOut();
+                setUser(null);
+            } else {
+                setUser(session?.user ?? null)
+            }
             setAuthLoading(false)
+        }).catch(err => {
+            console.error("Failed to recover session:", err);
+            supabase.auth.signOut();
+            setUser(null);
+            setAuthLoading(false);
         })
 
         // Listen for changes on auth state (logged in, signed out, etc.)
@@ -154,8 +165,8 @@ function App() {
 
         return {
             totalRacks,
-            totalWatts: totalConsumption, // Used as KW blindly per user request
-            totalConsumption,
+            totalWatts: totalConsumption,
+            totalConsumptionKW: totalConsumption / 1000,
             usagePercent: usagePercent.toFixed(1),
             freePercent: freePercent.toFixed(1),
             salaBreakdown: Object.values(salaGroups),
@@ -414,7 +425,7 @@ function App() {
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                                 {[
                                     { label: 'Total Racks', value: stats.totalRacks.toString(), icon: Box, color: 'blue' },
-                                    { label: 'Consumo Total', value: `${stats.totalWatts.toFixed(2)} KW`, icon: Zap, color: 'blue' },
+                                    { label: 'Consumo Total', value: `${stats.totalConsumptionKW.toFixed(2)} KW`, icon: Zap, color: 'blue' },
                                     { label: 'Ocupación Global', value: `${stats.usagePercent}%`, icon: Activity, color: 'blue' },
                                     { label: 'UR Libres Site', value: `${(stats.totalRacks * U_TOTAL - stats.filteredAssets.reduce((a, r) => a + r.devices.reduce((d, dv) => d + dv.u_height!, 0), 0))} UR`, icon: Database, color: 'emerald' },
                                 ].map((stat) => (
@@ -460,7 +471,7 @@ function App() {
                                                             <td className="py-3 px-2 text-slate-500 text-xs">{sala.racks}</td>
                                                             <td className="py-3 px-2 text-right text-blue-600 font-mono font-bold text-xs">{uPercent}%</td>
                                                             <td className="py-3 px-2 text-right text-emerald-600 font-mono text-xs">{availU} UR</td>
-                                                            <td className="py-3 px-2 text-right text-slate-700 font-mono text-xs">{sala.consumption.toFixed(2)} KW</td>
+                                                            <td className="py-3 px-2 text-right text-slate-700 font-mono text-xs">{(sala.consumption / 1000).toFixed(2)} KW</td>
                                                             <td className="py-3 px-2 text-right">
                                                                 <select
                                                                     onChange={(e) => {

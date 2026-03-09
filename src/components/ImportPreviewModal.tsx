@@ -96,7 +96,7 @@ export const ImportPreviewModal = ({ isOpen, onClose, onConfirm, data }: ImportP
                                         {item.consumo !== undefined && (
                                             <div className="w-24 bg-black/20 p-3 rounded-xl border border-white/5 flex flex-col items-center justify-center">
                                                 <p className="text-[10px] text-slate-500 uppercase mb-1">Consumo</p>
-                                                <p className="text-sm font-bold text-blue-400">{item.consumo.toFixed(2)} KW</p>
+                                                <p className="text-sm font-bold text-blue-400">{(item.consumo / 1000).toFixed(2)} KW</p>
                                             </div>
                                         )}
                                     </div>

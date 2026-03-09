@@ -275,7 +275,7 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                             <div className="mt-3 pt-3 border-t border-slate-100">
                                 <div className="flex justify-between items-center">
                                     <span className="text-[10px] text-slate-400 uppercase">Consumo</span>
-                                    <span className="text-[10px] font-bold text-blue-600">{(hoveredAsset || assets.find(a => a.id === selectedRackId))?.consumo} KW</span>
+                                    <span className="text-[10px] font-bold text-blue-600">{((hoveredAsset || assets.find(a => a.id === selectedRackId))!.consumo! / 1000).toFixed(2)} KW</span>
                                 </div>
                             </div>
                         )}
@@ -404,7 +404,7 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                         </div>
                         <div>
                             <p className="text-[9px] text-slate-400 uppercase font-bold">Consumo</p>
-                            <p className="text-sm font-bold text-amber-600">{selectedRack.consumo?.toFixed(2) || '0.00'} KW</p>
+                            <p className="text-sm font-bold text-amber-600">{selectedRack.consumo ? (selectedRack.consumo / 1000).toFixed(2) : '0.00'} KW</p>
                         </div>
                     </div>
 

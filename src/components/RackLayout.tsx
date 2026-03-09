@@ -94,7 +94,7 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                             <div className="text-right bg-blue-50 border border-blue-100 p-4 rounded-2xl min-w-[140px] shadow-sm">
                                 <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] mb-1">Total Load</p>
                                 <p className="text-2xl font-black text-blue-600 font-mono tracking-tighter">
-                                    {(rack.consumo).toFixed(2)} <span className="text-xs text-blue-400 uppercase">KW</span>
+                                    {(rack.consumo / 1000).toFixed(2)} <span className="text-xs text-blue-400 uppercase">KW</span>
                                 </p>
                             </div>
                         )}

@@ -89,88 +89,130 @@ export const parseAssetExcel = async (file: File): Promise<RackAsset[]> => {
 
                 const racksMap: Record<string, RackAsset> = {};
 
+                        // --- Import tracking counters ---
+                let skippedNoId = 0;
+                let devicesImported = 0;
+                let rackHeaderRows = 0;
+                const orphanRackKeys = new Set<string>();
+
                 jsonData.forEach((row, index) => {
-                    // Skip head (index 0 is usually headers like "SALA", "SITIO", "TIPO")
+                    // Skip header row (index 0 has column names like "SALA", "SITIO", "TIPO")
                     if (index === 0) return;
 
-                    const site = String(row['A'] || '').trim() || 'SITIO GENERAL';
-                    const room = String(row['B'] || '').trim() || 'SALA GENERAL';
+                    const site    = String(row['A'] || '').trim() || 'SITIO GENERAL';
+                    const room    = String(row['B'] || '').trim() || 'SALA GENERAL';
                     const typeRaw = String(row['C'] || '').trim().toUpperCase();
                     const rackIdRaw = String(row['I'] || '').trim();
 
-                    // If it's a "RACK" row according to Column C, we create/initialize the rack
+                    // Col C with RACK → this row IS the rack container (asset madre)
                     const isRackHeader = typeRaw.includes('RACK');
 
+                    // Guard: rows without a Rack ID cannot be placed anywhere
                     if (!rackIdRaw || rackIdRaw === '' || rackIdRaw.toUpperCase() === 'N/A' || rackIdRaw === 'Coordenada / Nuevo ID') {
+                        skippedNoId++;
                         return;
                     }
 
-                    const rackId = rackIdRaw;
-                    // Composite key to handle multiple sites/rooms with same coordinates - Normalizing to Uppercase
-                    const rackKey = `${site.toUpperCase()}-${room.toUpperCase()}-${rackId.toUpperCase()}`;
+                    // Composite key: prevents collision between racks with same ID in different sites/rooms
+                    const rackKey = `${site.toUpperCase()}-${room.toUpperCase()}-${rackIdRaw.toUpperCase()}`;
 
+                    // --- Create rack container if it doesn't exist yet ---
                     if (!racksMap[rackKey]) {
-                        const inferredCoords = parseCoords(rackId);
-
+                        const inferredCoords = parseCoords(rackIdRaw);
                         racksMap[rackKey] = {
                             id: `rack-${rackKey}-${index}`,
-                            tag_id: rackId,
+                            tag_id: rackIdRaw,
                             type: 'rack',
                             sala: room,
                             sitio: site,
-                            piso: String(row['D'] || '').trim(),
-                            estado: isRackHeader ? String(row['P'] || 'Operativo') : 'Operativo',
-                            propietario: String(row['L'] || '').trim(),
+                            piso:         String(row['D'] || '').trim(),
+                            estado:       isRackHeader ? String(row['P'] || 'Operativo') : 'Operativo',
+                            propietario:  String(row['L'] || '').trim(),
                             pos_x: inferredCoords ? inferredCoords.x : (Object.keys(racksMap).length % 20) * 2 + 1,
                             pos_z: inferredCoords ? inferredCoords.z : Math.floor(Object.keys(racksMap).length / 20) * 3 + 1,
-                            consumo: isRackHeader ? (safeParseNumber(row['AD']) || 0) : 0,
-                            alarm_hardware: isRackHeader ? safeParseAlarm(row['R']) : undefined,
+                            consumo:          isRackHeader ? (safeParseNumber(row['AD']) || 0) : 0,
+                            alarm_hardware:   isRackHeader ? safeParseAlarm(row['R']) : undefined,
                             alarm_ventilador: isRackHeader ? safeParseAlarm(row['S']) : undefined,
-                            alarm_fuente: isRackHeader ? safeParseAlarm(row['T']) : undefined,
-                            alarm_hdd: isRackHeader ? safeParseAlarm(row['U']) : undefined,
+                            alarm_fuente:     isRackHeader ? safeParseAlarm(row['T']) : undefined,
+                            alarm_hdd:        isRackHeader ? safeParseAlarm(row['U']) : undefined,
                             devices: []
                         };
+
+                        // If first encounter is NOT a RACK row → orphan rack (container inferred from device)
+                        if (!isRackHeader) {
+                            orphanRackKeys.add(rackKey);
+                        }
                     }
 
-                    if (racksMap[rackKey]) {
-                        // If the rack exists, we process additional info or devices
-                        const marca = String(row['E'] || '').trim(); // Marca seems to be E
-                        const modelo = String(row['F'] || '').trim(); // Modelo seems to be F
+                    if (isRackHeader) {
+                        rackHeaderRows++;
+                        // Update header info if rack already existed (e.g. multiple RACK rows for same ID)
+                        const marca  = String(row['E'] || '').trim();
+                        const modelo = String(row['F'] || '').trim();
+                        const deviceWatts = safeParseNumber(row['AD']);
+                        if (marca)        racksMap[rackKey].fabricante = marca;
+                        if (modelo)       racksMap[rackKey].modelo = modelo;
+                        if (deviceWatts)  racksMap[rackKey].consumo = deviceWatts;
+                        // Enrich header fields regardless of order
+                        if (!racksMap[rackKey].estado || racksMap[rackKey].estado === 'Operativo') {
+                            racksMap[rackKey].estado = String(row['P'] || 'Operativo');
+                        }
+                        racksMap[rackKey].alarm_hardware   = safeParseAlarm(row['R']) ?? racksMap[rackKey].alarm_hardware;
+                        racksMap[rackKey].alarm_ventilador = safeParseAlarm(row['S']) ?? racksMap[rackKey].alarm_ventilador;
+                        racksMap[rackKey].alarm_fuente     = safeParseAlarm(row['T']) ?? racksMap[rackKey].alarm_fuente;
+                        racksMap[rackKey].alarm_hdd        = safeParseAlarm(row['U']) ?? racksMap[rackKey].alarm_hdd;
+
+                    } else {
+                        // --- Device row: accept ALL non-rack rows that have a valid rackId ---
+                        // Previously only accepted rows with marca/modelo/serial — this lost real devices
+                        const marca       = String(row['E'] || '').trim();
+                        const modelo      = String(row['F'] || '').trim();
                         const deviceWatts = safeParseNumber(row['AD']);
 
-                        if (!isRackHeader && (marca || modelo || row['G'])) {
-                            const device: Device = {
-                                id: `dev-${index}-${Math.random().toString(36).substr(2, 5)}`,
-                                type: typeRaw.toLowerCase() || 'equipo',
-                                modelo: modelo,
-                                fabricante: marca,
-                                serie: String(row['G'] || '').trim(), // SN seems to be G
-                                u_position: safeParseNumber(row['M']),
-                                u_height: safeParseNumber(row['O']) || 1, // Heights in O
-                                watts: deviceWatts, // Consumption in Watts from Column AD
-                                ip_gestion: String(row['V'] || '').trim(),
-                                contrato: String(row['W'] || '').trim(),
-                                owner: String(row['L'] || '').trim(),
-                                f_instalacion: String(row['N'] || '').trim(),
-                                comentarios: String(row['Y'] || '').trim()
-                            };
-                            racksMap[rackKey].devices.push(device);
+                        const device: Device = {
+                            id:           `dev-${index}-${Math.random().toString(36).substr(2, 5)}`,
+                            type:         typeRaw.toLowerCase() || 'equipo',
+                            modelo:       modelo || undefined,
+                            fabricante:   marca || undefined,
+                            serie:        String(row['G'] || '').trim() || undefined,
+                            u_position:   safeParseNumber(row['M']),
+                            u_height:     safeParseNumber(row['O']) || 1,
+                            watts:        deviceWatts,
+                            ip_gestion:   String(row['V'] || '').trim() || undefined,
+                            contrato:     String(row['W'] || '').trim() || undefined,
+                            owner:        String(row['L'] || '').trim() || undefined,
+                            f_instalacion:String(row['N'] || '').trim() || undefined,
+                            comentarios:  String(row['Y'] || '').trim() || undefined,
+                        };
+                        racksMap[rackKey].devices.push(device);
+                        devicesImported++;
 
-                            // Sum to rack total if we just added a device with watts - Convert Watts to KW
-                            if (deviceWatts) {
-                                racksMap[rackKey].consumo = (racksMap[rackKey].consumo || 0) + (deviceWatts);
-                            }
-                        } else if (isRackHeader) {
-                            // Update header info if multiple rack rows exist for same ID
-                            if (marca) racksMap[rackKey].fabricante = marca;
-                            if (modelo) racksMap[rackKey].modelo = modelo;
-                            if (deviceWatts) racksMap[rackKey].consumo = deviceWatts;
+                        // Accumulate watt consumption per device into rack total
+                        if (deviceWatts) {
+                            racksMap[rackKey].consumo = (racksMap[rackKey].consumo || 0) + deviceWatts;
                         }
                     }
                 });
 
+                // --- Post-process: log orphans so they are visible (not silent) ---
+                if (orphanRackKeys.size > 0) {
+                    console.warn(`[Import] ⚠️ ${orphanRackKeys.size} ORPHAN rack(s) detected (devices found but no RACK row in Col C):`);
+                    orphanRackKeys.forEach(k => {
+                        const r = racksMap[k];
+                        console.warn(`  → ${r.tag_id} (${r.sitio}/${r.sala}) — ${r.devices.length} device(s) assigned`);
+                    });
+                }
+
                 const finalRacks = Object.values(racksMap);
-                console.log(`Import complete: ${finalRacks.length} unique racks identified across sites.`);
+                console.log(
+                    `[Import] ✅ DONE\n` +
+                    `  RACK header rows (Col C): ${rackHeaderRows}\n` +
+                    `  Unique rack containers:   ${finalRacks.length}\n` +
+                    `  ├─ With RACK header:       ${finalRacks.length - orphanRackKeys.size}\n` +
+                    `  └─ Orphan (inferred):      ${orphanRackKeys.size}\n` +
+                    `  Devices imported:          ${devicesImported}\n` +
+                    `  Rows skipped (no ID):      ${skippedNoId}`
+                );
                 resolve(finalRacks);
             } catch (error) {
                 reject(error);

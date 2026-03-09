@@ -1,0 +1,43 @@
+﻿
+=== TOTAL ROWS IN EXCEL: 1138 ===
+
+=== RACK ANALYSIS (Column C contains RACK) ===
+  Rows with RACK in Col C:     110
+  Unique Rack containers:      115
+  Racks with RACK row header:  107
+  Orphan racks (no RACK row):  8
+  Racks with >1 RACK header:   3
+
+=== DEVICE ANALYSIS ===
+  Device rows (imported):      1027
+  Device rows SILENTLY SKIPPED (no marca/modelo/serial): 0
+  Rows skipped (no Rack ID):   0
+
+=== TOP 10 RACKS BY DEVICE COUNT ===
+  J6 (CHILOE/CPD1)                              devices: 27  skipped: 0
+  J10 (SAN MARTIN/CPD2)                         devices: 26  skipped: 0
+  J14 (CHILOE/CPD1)                             devices: 26  skipped: 0
+  J7 (SAN MARTIN/CPD2)                          devices: 25  skipped: 0
+  N21 (SAN MARTIN/GSM)                          devices: 24  skipped: 0
+  K10 (CHILOE/CPD1)                             devices: 23  skipped: 0
+  F10 (SAN MARTIN/CPD2)                         devices: 21  skipped: 0
+  N09 (SAN MARTIN/GSM)                          devices: 20  skipped: 0
+  O16 (SAN MARTIN/GSM)                          devices: 20  skipped: 0
+  G05 (SAN MARTIN/GSM)                          devices: 19  skipped: 0
+
+=== ORPHAN RACKS (devices with no RACK header row) ===
+  F10/11 (APOQUINDO/MAINFRAME) ÔÇö 1 devices
+  E04 (SAN MARTIN/GSM) ÔÇö 11 devices
+  E05 (SAN MARTIN/GSM) ÔÇö 5 devices
+  N02 (SAN MARTIN/GSM) ÔÇö 2 devices
+  N20 (SAN MARTIN/GSM) ÔÇö 17 devices
+  J13 (SAN MARTIN/CPD2) ÔÇö 1 devices
+  J12 (SAN MARTIN/CPD2) ÔÇö 1 devices
+  J11 (SAN MARTIN/CPD2) ÔÇö 1 devices
+
+=== SUMMARY ===
+  Excel rows total:            1138
+  RACK header rows (Col C):    110  ÔåÆ user says 111
+  Final unique rack containers:115
+  Total devices imported:      1027
+  Total devices LOST (silent): 0

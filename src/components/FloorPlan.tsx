@@ -301,7 +301,7 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                     initial={{ x: 300, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     exit={{ x: 300, opacity: 0 }}
-                    className="w-full xl:w-1/3 bg-white border border-slate-200 rounded-2xl p-6 overflow-hidden shadow-sm h-[650px]"
+                    className="w-full xl:w-1/3 bg-white border border-slate-200 rounded-2xl p-6 overflow-hidden shadow-sm h-[750px]"
                 >
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6">
@@ -320,7 +320,10 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                     </div>
 
                     {/* Rack Visual */}
-                    <div className="relative bg-[#0a0a0a] rounded-xl p-4 border border-slate-800 shadow-inner">
+                    <div className="relative bg-[#0a0a0a] rounded-xl pt-4 pb-2 px-6 border-[8px] border-[#1a1a1a] shadow-2xl flex flex-col items-center">
+                        <div className="absolute left-6 top-0 bottom-0 w-4 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 opacity-20"></div>
+                        <div className="absolute right-6 top-0 bottom-0 w-4 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 opacity-20"></div>
+                        
                         {(() => {
                             const maxPos = rackDevices.reduce((max, d) => Math.max(max, (d.u_position || 1) + (d.u_height || 1) - 1), U_TOTAL);
                             const dynamicU = Math.max(U_TOTAL, maxPos);
@@ -328,19 +331,19 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                             return (
                                 <div className="flex gap-2">
                                     {/* U Labels */}
-                                    <div className="flex flex-col-reverse gap-0.5">
+                                    <div className="flex flex-col-reverse relative z-10 w-6">
                                         {Array.from({ length: dynamicU }).map((_, i) => (
                                             <div
                                                 key={i}
-                                                className="h-[14px] flex items-center justify-center text-[7px] text-slate-400 font-mono w-6 font-bold"
+                                                className="h-[14px] flex items-center justify-center text-[6px] text-slate-500 font-mono font-bold"
                                             >
-                                                U{i + 1}
+                                                {String(i + 1).padStart(2, '0')}
                                             </div>
                                         ))}
                                     </div>
 
                                     {/* Rack Slots */}
-                                    <div className="flex-1 flex flex-col-reverse gap-0.5 relative">
+                                    <div className="flex-1 flex flex-col-reverse relative z-10">
                                         {Array.from({ length: dynamicU }).map((_, uIndex) => {
                                             const uPosition = uIndex + 1
                                             const deviceAtU = rackDevices.find(d => d.u_position === uPosition)
@@ -350,18 +353,18 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                                                     key={uIndex}
                                                     onDragOver={(e) => e.preventDefault()}
                                                     onDrop={() => handleDeviceDrop(uPosition)}
-                                                    className={`h-[14px] rounded-xs border transition-all ${deviceAtU
-                                                        ? 'bg-blue-600/20 border-blue-500/30'
-                                                        : 'bg-slate-900 border-slate-800 hover:border-blue-500/30 shadow-xs'
+                                                    className={`h-[14px] border-b border-white/5 transition-all ${deviceAtU
+                                                        ? 'bg-blue-600/10'
+                                                        : 'hover:bg-white/5'
                                                         }`}
                                                 >
                                                     {deviceAtU && (
                                                         <div
                                                             draggable
                                                             onDragStart={() => handleDeviceDragStart(deviceAtU)}
-                                                            className="h-full px-1.5 flex items-center justify-between group relative"
+                                                            className="h-full px-2 flex items-center justify-between group relative bg-white border border-slate-200 rounded-xs shadow-sm"
                                                         >
-                                                            <span className="text-[7px] text-blue-700 font-mono font-bold truncate flex-1 cursor-move">
+                                                            <span className="text-[6px] text-slate-900 font-bold truncate flex-1 cursor-move uppercase tracking-tighter">
                                                                 {deviceAtU.type || 'Device'}
                                                             </span>
                                                             <button

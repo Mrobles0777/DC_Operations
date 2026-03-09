@@ -114,9 +114,10 @@ function App() {
 
     const handleClearAllInventory = () => {
         setAssets([])
-        localStorage.removeItem('rack_inventory')
+        localStorage.removeItem('dc-inventory')
         setShowClearAllConfirm(false)
     }
+
 
     const availableSites = useMemo(() => {
         const sites = new Set(assets.map(a => a.sitio).filter(Boolean));
@@ -221,15 +222,23 @@ function App() {
 
     const handleConfirmImport = (importedRacks: RackAsset[]) => {
         setAssets(prev => {
-            const assetMap = new Map(prev.map(a => [a.tag_id, a]));
+            // Composite key must match the one in excelUtils: site-room-tagId
+            // Using only tag_id caused racks with the same ID in different sites/rooms to overwrite each other
+            const toKey = (a: RackAsset) =>
+                `${(a.sitio || '').toUpperCase()}-${(a.sala || '').toUpperCase()}-${a.tag_id.toUpperCase()}`;
+
+            const assetMap = new Map(prev.map(a => [toKey(a), a]));
             importedRacks.forEach(rack => {
-                assetMap.set(rack.tag_id, rack);
+                assetMap.set(toKey(rack), rack);
             });
-            return Array.from(assetMap.values());
+            const merged = Array.from(assetMap.values());
+            console.log(`[Import Merge] prev: ${prev.length} | imported: ${importedRacks.length} | merged unique: ${merged.length}`);
+            return merged;
         });
         setIsPreviewOpen(false)
         setPreviewData([])
     }
+
 
     const openRackDetail = (rack: RackAsset) => {
         setSelectedRack(rack);

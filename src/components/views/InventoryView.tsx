@@ -22,7 +22,7 @@ export const InventoryView = ({
     return (
         <div className="flex-1 overflow-hidden flex flex-col gap-6">
             <div className="flex flex-col lg:flex-row gap-6 min-h-0 flex-1">
-                <section className="glass-card bg-white border-slate-200/60 flex-1 p-4 md:p-8 overflow-hidden flex flex-col shadow-sm">
+                <section className="glass-card bg-white border-slate-200/60 lg:flex-[1.5] p-4 md:p-8 overflow-hidden flex flex-col shadow-sm min-h-[400px]">
                     <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6">
                         <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
                             <Database className="text-blue-600" />

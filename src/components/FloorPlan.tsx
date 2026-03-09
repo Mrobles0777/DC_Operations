@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { ZoomIn, ZoomOut, Maximize2, X, Trash2, Save } from 'lucide-react'
 import { RackAsset, Device, U_TOTAL } from '../utils/excelUtils'
@@ -26,8 +26,31 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
     const [rackDevices, setRackDevices] = useState<Device[]>([])
     const [hasChanges, setHasChanges] = useState(false)
 
-    // System: 1 unit = 20 pixels for better visibility
-    const SCALE = 24 // Increased scale for labels
+    // System: Dynamic scale based on room size to ensure it fits the screen
+    const [containerSize, setContainerSize] = useState({ width: 800, height: 600 })
+    
+    useEffect(() => {
+        const updateSize = () => {
+            if (svgRef.current?.parentElement) {
+                const { clientWidth, clientHeight } = svgRef.current.parentElement
+                setContainerSize({ width: clientWidth, height: clientHeight })
+            }
+        }
+        updateSize()
+        window.addEventListener('resize', updateSize)
+        return () => window.removeEventListener('resize', updateSize)
+    }, [])
+
+    const SCALE = useMemo(() => {
+        const padding = 60
+        const availableW = containerSize.width - padding
+        const availableH = containerSize.height - padding
+        const scaleW = availableW / room.width
+        const scaleH = availableH / room.height
+        // Clamp scale between 15 and 40 for usability
+        return Math.min(Math.max(Math.min(scaleW, scaleH), 15), 40)
+    }, [containerSize, room.width, room.height])
+
     const AXIS_OFFSET = SCALE * 1.5
 
     // Helper to convert number to letter (1=A, 2=B...)

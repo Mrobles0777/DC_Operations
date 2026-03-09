@@ -129,7 +129,7 @@ function App() {
     }
 
     return (
-        <div className="premium-bg flex flex-col md:flex-row h-screen overflow-hidden text-slate-900 relative">
+        <div className="premium-bg flex flex-col md:flex-row min-h-screen overflow-x-hidden text-slate-900 relative">
             {/* Mobile Header */}
             <header className="md:hidden flex items-center justify-between p-4 bg-white/80 backdrop-blur-md border-b border-slate-200 z-40 relative">
                 <div className="flex items-center gap-3">

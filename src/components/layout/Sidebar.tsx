@@ -36,7 +36,7 @@ export const Sidebar = ({
             )}
 
             {/* Sidebar */}
-            <aside className={`w-64 glass-card m-4 p-6 flex flex-col gap-8 bg-white/95 border-slate-200/60 shadow-xl shadow-slate-200/40 fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-[110%]'}`}>
+            <aside className={`w-64 glass-card m-4 p-6 flex flex-col gap-8 bg-white/95 border-slate-200/60 shadow-xl shadow-slate-200/40 fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out md:sticky md:top-4 md:h-[calc(100vh-2rem)] md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-[110%]'}`}>
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-blue-200">DC</div>

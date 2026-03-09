@@ -224,7 +224,7 @@ export const DashboardView = ({
                         </div>
                     </div>
 
-                    <div className="glass-card p-6 bg-white border-slate-200/60 w-full lg:w-[380px] flex flex-col min-h-0 shadow-2xl relative overflow-hidden group/preview">
+                    <div className="glass-card p-6 bg-white border-slate-200/60 w-full lg:flex-[1.5] flex flex-col min-h-0 shadow-2xl relative overflow-hidden group/preview">
                         <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-transparent pointer-events-none"></div>
 
                         <div className="flex justify-between items-center mb-6 relative z-10">

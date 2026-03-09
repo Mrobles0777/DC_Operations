@@ -320,9 +320,9 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                     </div>
 
                     {/* Rack Visual */}
-                    <div className="relative bg-[#0a0a0a] rounded-xl pt-4 pb-2 px-6 border-[8px] border-[#1a1a1a] shadow-2xl flex flex-col items-center">
-                        <div className="absolute left-6 top-0 bottom-0 w-4 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 opacity-20"></div>
-                        <div className="absolute right-6 top-0 bottom-0 w-4 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 opacity-20"></div>
+                    <div className="relative bg-[#0a0a0a] rounded-xl pt-4 pb-2 px-8 border-[12px] border-[#1a1a1a] shadow-2xl flex flex-col items-center w-72 mx-auto">
+                        <div className="absolute left-8 top-0 bottom-0 w-6 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 opacity-20"></div>
+                        <div className="absolute right-8 top-0 bottom-0 w-6 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 opacity-20"></div>
                         
                         {(() => {
                             const maxPos = rackDevices.reduce((max, d) => Math.max(max, (d.u_position || 1) + (d.u_height || 1) - 1), U_TOTAL);
@@ -343,7 +343,7 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                                     </div>
 
                                     {/* Rack Slots */}
-                                    <div className="flex-1 flex flex-col-reverse relative z-10">
+                                    <div className="flex-1 flex flex-col-reverse relative z-10 w-full">
                                         {Array.from({ length: dynamicU }).map((_, uIndex) => {
                                             const uPosition = uIndex + 1
                                             const deviceAtU = rackDevices.find(d => d.u_position === uPosition)
@@ -362,11 +362,24 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                                                         <div
                                                             draggable
                                                             onDragStart={() => handleDeviceDragStart(deviceAtU)}
-                                                            className="h-full px-2 flex items-center justify-between group relative bg-white border border-slate-200 rounded-xs shadow-sm"
+                                                            className="h-full px-2 flex items-center justify-between group relative bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden"
                                                         >
-                                                            <span className="text-[6px] text-slate-900 font-bold truncate flex-1 cursor-move uppercase tracking-tighter">
-                                                                {deviceAtU.type || 'Device'}
-                                                            </span>
+                                                            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                                                <div className={`w-1 h-1 rounded-full flex-shrink-0 ${selectedRack.estado?.toUpperCase() === 'OPERATIVO' ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
+                                                                <div className="flex flex-col min-w-0 leading-none">
+                                                                    <span className="text-[6px] text-slate-900 font-black truncate uppercase tracking-tighter">
+                                                                        {deviceAtU.fabricante || 'Device'}
+                                                                    </span>
+                                                                    <span className="text-[5px] text-blue-600 font-bold truncate uppercase tracking-widest mt-0.5">
+                                                                        {deviceAtU.modelo || 'Generic'}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div className="flex gap-0.5 opacity-20 ml-1">
+                                                                <div className="w-2.5 h-2.5 border border-slate-400 rounded-px"></div>
+                                                                <div className="w-2.5 h-2.5 border border-slate-400 rounded-px"></div>
+                                                            </div>
                                                             <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();

@@ -301,7 +301,7 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                     initial={{ x: 300, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     exit={{ x: 300, opacity: 0 }}
-                    className="w-full xl:w-1/3 bg-white border border-slate-200 rounded-2xl p-6 overflow-auto shadow-sm max-h-[600px]"
+                    className="w-full xl:w-1/3 bg-white border border-slate-200 rounded-2xl p-6 overflow-hidden shadow-sm h-[650px]"
                 >
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6">
@@ -332,7 +332,7 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                                         {Array.from({ length: dynamicU }).map((_, i) => (
                                             <div
                                                 key={i}
-                                                className="h-6 flex items-center justify-center text-[8px] text-slate-400 font-mono w-8 font-bold"
+                                                className="h-[14px] flex items-center justify-center text-[7px] text-slate-400 font-mono w-6 font-bold"
                                             >
                                                 U{i + 1}
                                             </div>
@@ -350,7 +350,7 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                                                     key={uIndex}
                                                     onDragOver={(e) => e.preventDefault()}
                                                     onDrop={() => handleDeviceDrop(uPosition)}
-                                                    className={`h-6 rounded border transition-all ${deviceAtU
+                                                    className={`h-[14px] rounded-xs border transition-all ${deviceAtU
                                                         ? 'bg-blue-600/20 border-blue-500/30'
                                                         : 'bg-slate-900 border-slate-800 hover:border-blue-500/30 shadow-xs'
                                                         }`}
@@ -359,9 +359,9 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                                                         <div
                                                             draggable
                                                             onDragStart={() => handleDeviceDragStart(deviceAtU)}
-                                                            className="h-full px-2 flex items-center justify-between group relative"
+                                                            className="h-full px-1.5 flex items-center justify-between group relative"
                                                         >
-                                                            <span className="text-[9px] text-blue-700 font-mono font-bold truncate flex-1 cursor-move">
+                                                            <span className="text-[7px] text-blue-700 font-mono font-bold truncate flex-1 cursor-move">
                                                                 {deviceAtU.type || 'Device'}
                                                             </span>
                                                             <button

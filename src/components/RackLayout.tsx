@@ -109,7 +109,7 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
 
                     {/* 3D Isometric Container */}
                     <div
-                        className={`${isCompact ? 'w-56 scale-90' : 'w-80'} relative bg-[#0a0a0a] rounded-xl border-[16px] border-[#1a1a1a] shadow-[0_40px_80px_rgba(0,0,0,0.2)] flex flex-col p-1 overflow-visible ring-4 ring-slate-900/10 transition-all duration-700
+                        className={`${isCompact ? 'w-56 scale-90' : 'w-72'} relative bg-[#0a0a0a] rounded-xl border-[12px] border-[#1a1a1a] shadow-[0_40px_80px_rgba(0,0,0,0.3)] flex flex-col p-1 overflow-visible ring-4 ring-slate-900/10 transition-all duration-700
                             [transform:rotateX(15deg)_rotateY(-15deg)_skewX(0deg)] hover:[transform:rotateX(5deg)_rotateY(-5deg)] shadow-inner`}
                     >
                         {/* 3D Depth Sides */}
@@ -119,23 +119,22 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                         {(() => {
                             const maxPos = positionedDevices.reduce((max: number, d: any) => Math.max(max, (d.u_position || 0) + (d.u_height || 1) - 1), 42);
                             const totalU = Math.max(42, maxPos);
+                            const unitHeight = 14;
 
                             return (
-                                <div className="flex flex-col overflow-y-auto custom-scrollbar max-h-[750px] relative">
+                                <div className="flex flex-col relative">
                                     {/* Realistic Industrial Rails with 3D Depth */}
-                                    <div className="absolute left-8 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 flex flex-col py-2 space-y-2 shadow-sm">
+                                    <div className="absolute left-6 top-0 bottom-0 w-6 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 flex flex-col py-1 space-y-1 shadow-sm">
                                         {Array.from({ length: totalU }).map((_, i) => (
-                                            <div key={i} className="flex flex-col items-center gap-1 opacity-20">
-                                                <div className="w-1.5 h-1.5 bg-slate-600 rounded-sm border border-slate-700 shadow-inner"></div>
-                                                <div className="w-1.5 h-1.5 bg-slate-600 rounded-sm border border-slate-700 shadow-inner"></div>
+                                            <div key={i} className="flex flex-col items-center gap-0.5 opacity-20">
+                                                <div className="w-1 h-1 bg-slate-600 rounded-full border border-slate-700 shadow-inner"></div>
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="absolute right-8 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 flex flex-col py-2 space-y-2 shadow-sm">
+                                    <div className="absolute right-6 top-0 bottom-0 w-6 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 flex flex-col py-1 space-y-1 shadow-sm">
                                         {Array.from({ length: totalU }).map((_, i) => (
-                                            <div key={i} className="flex flex-col items-center gap-1 opacity-20">
-                                                <div className="w-1.5 h-1.5 bg-slate-600 rounded-sm border border-slate-700 shadow-inner"></div>
-                                                <div className="w-1.5 h-1.5 bg-slate-600 rounded-sm border border-slate-700 shadow-inner"></div>
+                                            <div key={i} className="flex flex-col items-center gap-0.5 opacity-20">
+                                                <div className="w-1 h-1 bg-slate-600 rounded-full border border-slate-700 shadow-inner"></div>
                                             </div>
                                         ))}
                                     </div>
@@ -156,19 +155,19 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                                             <div
                                                 key={uNumber}
                                                 onMouseEnter={() => deviceAtU && setHoveredDeviceId(deviceAtU.id)}
-                                                onMouseLeave={() => setHoveredDeviceId(null)}
-                                                className={`h-[22px] w-full border-b border-white/5 flex items-center px-2 relative transition-all ${deviceAtU ? 'bg-blue-500/5' : 'hover:bg-white/5'}`}
+                                                onMouseLeave={() => hoveredDeviceId === deviceAtU?.id && setHoveredDeviceId(null)}
+                                                className={`h-[14px] w-full border-b border-white/5 flex items-center px-1 relative transition-all ${deviceAtU ? 'bg-blue-500/5' : 'hover:bg-white/5'}`}
                                             >
-                                                <span className="text-[7px] text-slate-600 font-black absolute left-2 select-none font-mono">{uNumber}</span>
+                                                <span className="text-[6px] text-slate-500 font-bold absolute left-1 select-none font-mono">{uNumber}</span>
 
                                                 {deviceAtU && isTopMostUnit && (
                                                     <motion.div
                                                         layoutId={deviceAtU.id}
                                                         initial={{ opacity: 0, x: -10 }}
                                                         animate={{ opacity: 1, x: 0 }}
-                                                        style={{ height: `${(deviceAtU.u_height || 1) * 22 - 1}px` }}
-                                                        className={`absolute left-8 right-8 top-[0px] z-20 transition-all duration-300 ${isHovered ? 'ring-2 ring-blue-500 z-30 scale-[1.01] shadow-2xl' : 'shadow-lg'}
-                                                bg-gradient-to-b from-slate-50 to-white border border-slate-200 rounded-sm flex flex-col justify-center px-4 overflow-hidden`}
+                                                        style={{ height: `${(deviceAtU.u_height || 1) * unitHeight - 1}px` }}
+                                                        className={`absolute left-6 right-6 top-[0px] z-20 transition-all duration-300 ${isHovered ? 'ring-2 ring-blue-500 z-30 scale-[1.01] shadow-2xl' : 'shadow-lg'}
+                                                bg-gradient-to-b from-slate-50 to-white border border-slate-200 rounded-sm flex flex-col justify-center px-2 overflow-hidden`}
                                                     >
                                                         {/* Brushed Metal Texture Overlay */}
                                                         <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/brushed-alum.png')]"></div>
@@ -176,12 +175,12 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                                                         {/* Technical Faceplate details */}
                                                         <div className="flex items-center justify-between relative z-10">
                                                             <div className="flex items-center gap-2 overflow-hidden">
-                                                                <div className={`w-1.5 h-1.5 rounded-full ${getStatusColor()}`}></div>
+                                                                <div className={`w-1 h-1 rounded-full ${getStatusColor()}`}></div>
                                                                 <div className="flex flex-col min-w-0">
-                                                                    <span className="text-[8px] font-black text-slate-900 truncate uppercase tracking-tighter leading-none">
+                                                                    <span className="text-[7px] font-black text-slate-900 truncate uppercase tracking-tighter leading-none">
                                                                         {deviceAtU.fabricante}
                                                                     </span>
-                                                                    <span className="text-[7px] text-blue-600 font-black truncate uppercase tracking-widest leading-none mt-0.5">
+                                                                    <span className="text-[6px] text-blue-600 font-bold truncate uppercase tracking-widest leading-none mt-0.5">
                                                                         {deviceAtU.modelo}
                                                                     </span>
                                                                 </div>

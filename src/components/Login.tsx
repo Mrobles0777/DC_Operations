@@ -50,9 +50,9 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
-                className="relative z-10 w-full max-w-lg p-1"
+                className="relative z-10 w-full max-w-lg p-4 sm:p-1"
             >
-                <div className="bg-white border border-slate-200 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 overflow-hidden p-10 md:p-12">
+                <div className="bg-white border border-slate-200 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 overflow-hidden p-8 sm:p-10 md:p-12">
                     {/* Header */}
                     <div className="text-center mb-10">
                         <motion.div
@@ -62,7 +62,7 @@ export const Login = ({ onLoginSuccess }: LoginProps) => {
                         >
                             <ShieldCheck size={40} className="text-white" />
                         </motion.div>
-                        <h2 className="text-4xl font-black text-slate-900 tracking-tighter mb-2">AUTH PORTAL</h2>
+                        <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tighter mb-2">AUTH PORTAL</h2>
                         <div className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.4em] text-blue-600">
                             <Server size={12} />
                             DC Asset Manager v2.0

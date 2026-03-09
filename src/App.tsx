@@ -1,4 +1,4 @@
-import { LayoutDashboard, Database, Map as MapIcon, Users, Settings, FileSpreadsheet, Trash2, Download, Box, Activity, Zap, X, Save, Check, AlertTriangle, Search } from 'lucide-react'
+import { LayoutDashboard, Database, Map as MapIcon, Users, Settings, FileSpreadsheet, Trash2, Download, Box, Activity, Zap, X, Save, Check, AlertTriangle, Search, Menu } from 'lucide-react'
 import { useState, useRef, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FloorPlan } from './components/FloorPlan'
@@ -48,6 +48,7 @@ function App() {
     const [viewingSite, setViewingSite] = useState<string | null>(null)
     const [viewingSala, setViewingSala] = useState<string | null>(null)
     const [showClearAllConfirm, setShowClearAllConfirm] = useState(false)
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
     // Dashboard local search & sort
     const [dashboardSearch, setDashboardSearch] = useState('');
@@ -249,13 +250,42 @@ function App() {
     }
 
     return (
-        <div className="premium-bg flex h-screen overflow-hidden text-slate-900">
-            {/* Sidebar... */}
-            {/* Sidebar */}
-            <aside className="w-64 glass-card m-4 p-6 flex flex-col gap-8 bg-white/80 border-slate-200/60 shadow-xl shadow-slate-200/40">
+        <div className="premium-bg flex flex-col md:flex-row h-screen overflow-hidden text-slate-900 relative">
+            {/* Mobile Header */}
+            <header className="md:hidden flex items-center justify-between p-4 bg-white/80 backdrop-blur-md border-b border-slate-200 z-40 relative">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-blue-200">DC</div>
-                    <h1 className="text-xl font-bold tracking-tight text-slate-900">AssetManager</h1>
+                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-sm text-white shadow-lg shadow-blue-200">DC</div>
+                    <h1 className="text-lg font-bold tracking-tight text-slate-900">AssetManager</h1>
+                </div>
+                <button
+                    onClick={() => setIsMobileMenuOpen(true)}
+                    className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                    <Menu size={24} />
+                </button>
+            </header>
+
+            {/* Mobile Menu Backdrop */}
+            {isMobileMenuOpen && (
+                <div 
+                    className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 md:hidden"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+            )}
+
+            {/* Sidebar */}
+            <aside className={`w-64 glass-card m-4 p-6 flex flex-col gap-8 bg-white/95 border-slate-200/60 shadow-xl shadow-slate-200/40 fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-[110%]'}`}>
+                <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-blue-200">DC</div>
+                        <h1 className="text-xl font-bold tracking-tight text-slate-900">AssetManager</h1>
+                    </div>
+                    <button 
+                        className="md:hidden text-slate-400 hover:text-red-500"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                        <X size={24} />
+                    </button>
                 </div>
 
                 <nav className="flex flex-col gap-2">
@@ -272,6 +302,7 @@ function App() {
                                 setActiveTab(item.id);
                                 setSelectedRack(null);
                                 setIsRackModalOpen(false);
+                                setIsMobileMenuOpen(false);
                                 if (item.id === 'floorplan') {
                                     setViewingSite(null);
                                     setViewingSala(null);
@@ -300,16 +331,16 @@ function App() {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 p-8 overflow-auto flex flex-col">
-                <header className="mb-8 flex justify-between items-center">
+            <main className="flex-1 p-4 md:p-8 overflow-auto flex flex-col">
+                <header className="mb-6 md:mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h2 className="text-3xl font-bold capitalize text-slate-900">{activeTab}</h2>
-                        <p className="text-slate-500 mt-1">Gestión avanzada de activos de centro de datos</p>
+                        <h2 className="text-2xl md:text-3xl font-bold capitalize text-slate-900">{activeTab}</h2>
+                        <p className="text-slate-500 mt-1 text-sm md:text-base">Gestión avanzada de activos de centro de datos</p>
                     </div>
 
-                    <div className="flex items-center gap-8">
+                    <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-8 w-full md:w-auto">
                         {activeTab === 'dashboard' && <StatusIndicators alarms={stats.alarms} racksStats={{ total: stats.totalRacks, usage: stats.usagePercent }} />}
-                        <div className="flex gap-3">
+                        <div className="flex flex-wrap gap-2 md:gap-3 w-full md:w-auto">
                             {activeTab === 'inventory' && (
                                 <>
                                     <button
@@ -400,14 +431,14 @@ function App() {
                             </div>
 
 
-                            <div className="flex gap-6 flex-1 min-h-0">
+                            <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
                                 {/* Room Breakdown - First on the left */}
-                                <div className="glass-card p-6 bg-white border-slate-200/60 overflow-hidden flex flex-col w-[25%] shadow-sm">
+                                <div className="glass-card p-6 bg-white border-slate-200/60 overflow-hidden flex flex-col w-full lg:w-[25%] shadow-sm">
                                     <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                                         <MapIcon className="text-blue-600" size={18} />
                                         Resumen por Sala
                                     </h3>
-                                    <div className="overflow-auto flex-1">
+                                    <div className="overflow-x-auto flex-1 w-full relative">
                                         <table className="w-full text-left">
                                             <thead className="text-slate-400 text-[9px] uppercase tracking-[0.15em]">
                                                 <tr className="border-b border-slate-100">
@@ -613,9 +644,9 @@ function App() {
 
                     {activeTab === 'inventory' && (
                         <div className="flex-1 overflow-hidden flex flex-col gap-6">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
-                                <section className="glass-card bg-white border-slate-200/60 flex-1 p-8 overflow-hidden flex flex-col shadow-sm">
-                                    <div className="flex justify-between items-center mb-6">
+                            <div className="flex flex-col lg:flex-row gap-6 min-h-0 flex-1">
+                                <section className="glass-card bg-white border-slate-200/60 flex-1 p-4 md:p-8 overflow-hidden flex flex-col shadow-sm">
+                                    <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6">
                                         <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
                                             <Database className="text-blue-600" />
                                             Lista de Activos
@@ -630,8 +661,8 @@ function App() {
                                             </button>
                                         )}
                                     </div>
-                                    <div className="overflow-auto flex-1">
-                                        <table className="w-full text-left">
+                                    <div className="overflow-x-auto flex-1 w-full">
+                                        <table className="w-full text-left min-w-[600px]">
                                             <thead className="bg-slate-50 text-slate-400 text-xs uppercase tracking-widest sticky top-0">
                                                 <tr>
                                                     <th className="pb-4 px-4">Tag ID</th>

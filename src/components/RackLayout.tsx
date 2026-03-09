@@ -102,9 +102,9 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                 </div>
             )}
 
-            <div className={`flex-1 flex ${isCompact ? 'flex-col items-center' : 'gap-12'} overflow-hidden pt-4`}>
+            <div className={`flex-1 flex ${isCompact ? 'flex-col items-center' : 'flex-col lg:flex-row gap-8 lg:gap-12'} overflow-hidden pt-4`}>
                 {/* Digital Twin Rack Engine with Isometric Perspective */}
-                <div className="flex flex-col items-center gap-6 group/rack perspective-[2000px]">
+                <div className="flex flex-col items-center gap-6 group/rack perspective-[2000px] flex-shrink-0">
                     {!isCompact && <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.3em] opacity-60 group-hover/rack:opacity-100 transition-opacity">Digital Twin Engine [Isometric]</p>}
 
                     {/* 3D Isometric Container */}
@@ -256,7 +256,7 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
                                                     </div>
                                                 </div>
 
-                                                <div className="grid grid-cols-3 gap-8">
+                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8">
                                                     {[
                                                         { icon: Hash, label: 'Serial / P.N.', value: dev.serie || 'SECURED_ID', color: 'text-slate-600' },
                                                         { icon: Activity, label: 'Management IP', value: dev.ip_gestion || 'ISOLATED', color: 'text-emerald-600' },

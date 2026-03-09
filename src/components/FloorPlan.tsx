@@ -123,9 +123,9 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
     }
 
     return (
-        <div className="relative w-full h-[600px] flex gap-4">
+        <div className="relative w-full flex flex-col xl:flex-row gap-4 min-h-[600px] xl:h-[600px]">
             {/* Floor Plan View */}
-            <div className={`relative ${selectedRack ? 'w-2/3' : 'w-full'} bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-300`}>
+            <div className={`relative ${selectedRack ? 'w-full xl:w-2/3' : 'w-full'} h-[500px] xl:h-full bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm transition-all duration-300`}>
                 {/* Controls */}
                 <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
                     <button
@@ -301,7 +301,7 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                     initial={{ x: 300, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     exit={{ x: 300, opacity: 0 }}
-                    className="w-1/3 bg-white border border-slate-200 rounded-2xl p-6 overflow-auto shadow-sm"
+                    className="w-full xl:w-1/3 bg-white border border-slate-200 rounded-2xl p-6 overflow-auto shadow-sm max-h-[600px]"
                 >
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6">

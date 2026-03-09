@@ -324,10 +324,10 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                     initial={{ x: 300, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     exit={{ x: 300, opacity: 0 }}
-                    className="w-full xl:w-1/3 bg-white border border-slate-200 rounded-2xl p-6 overflow-hidden shadow-sm h-[750px]"
+                    className="w-full xl:w-1/3 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col min-h-0"
                 >
                     {/* Header */}
-                    <div className="flex justify-between items-center mb-6">
+                    <div className="flex justify-between items-center mb-6 flex-shrink-0">
                         <div>
                             <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                                 Layout Frontal: {selectedRack.tag_id}
@@ -342,51 +342,52 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                         </button>
                     </div>
 
-                    {/* Rack Visual */}
-                    <div className="relative bg-[#0a0a0a] rounded-xl pt-4 pb-2 px-8 border-[12px] border-[#1a1a1a] shadow-2xl flex flex-col items-center w-72 mx-auto">
-                        <div className="absolute left-8 top-0 bottom-0 w-6 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 opacity-20"></div>
-                        <div className="absolute right-8 top-0 bottom-0 w-6 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 opacity-20"></div>
-                        
-                        {(() => {
-                            const maxPos = rackDevices.reduce((max, d) => Math.max(max, (d.u_position || 1) + (d.u_height || 1) - 1), U_TOTAL);
-                            const dynamicU = Math.max(U_TOTAL, maxPos);
+                    {/* Rack Visual Container with Scroll if needed */}
+                    <div className="flex-1 min-h-0 overflow-y-auto pr-2 custom-scrollbar flex flex-col">
+                        <div className="relative bg-[#0a0a0a] rounded-xl pt-4 pb-2 px-8 border-[12px] border-[#1a1a1a] shadow-2xl flex flex-col items-center w-72 mx-auto flex-shrink-0 min-h-[500px]">
+                            <div className="absolute left-8 top-0 bottom-0 w-6 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 opacity-20"></div>
+                            <div className="absolute right-8 top-0 bottom-0 w-6 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-x border-slate-800/50 z-0 opacity-20"></div>
+                            
+                            {(() => {
+                                const maxPos = rackDevices.reduce((max, d) => Math.max(max, (d.u_position || 1) + (d.u_height || 1) - 1), U_TOTAL);
+                                const dynamicU = Math.max(U_TOTAL, maxPos);
 
-                            return (
-                                <div className="flex gap-2">
-                                    {/* U Labels */}
-                                    <div className="flex flex-col-reverse relative z-10 w-6">
-                                        {Array.from({ length: dynamicU }).map((_, i) => (
-                                            <div
-                                                key={i}
-                                                className="h-[14px] flex items-center justify-center text-[6px] text-slate-500 font-mono font-bold"
-                                            >
-                                                {String(i + 1).padStart(2, '0')}
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Rack Slots */}
-                                    <div className="flex-1 flex flex-col-reverse relative z-10 w-full">
-                                        {Array.from({ length: dynamicU }).map((_, uIndex) => {
-                                            const uPosition = uIndex + 1
-                                            const deviceAtU = rackDevices.find(d => d.u_position === uPosition)
-
-                                            return (
+                                return (
+                                    <div className="flex gap-2 w-full flex-1">
+                                        {/* U Labels */}
+                                        <div className="flex flex-col-reverse relative z-10 w-6">
+                                            {Array.from({ length: dynamicU }).map((_, i) => (
                                                 <div
-                                                    key={uIndex}
-                                                    onDragOver={(e) => e.preventDefault()}
-                                                    onDrop={() => handleDeviceDrop(uPosition)}
-                                                    className={`h-[14px] border-b border-white/5 transition-all ${deviceAtU
-                                                        ? 'bg-blue-600/10'
-                                                        : 'hover:bg-white/5'
-                                                        }`}
+                                                    key={i}
+                                                    className="flex-1 min-h-[8px] flex items-center justify-center text-[6px] text-slate-500 font-mono font-bold"
                                                 >
-                                                    {deviceAtU && (
-                                                        <div
-                                                            draggable
-                                                            onDragStart={() => handleDeviceDragStart(deviceAtU)}
-                                                            className="h-full px-2 flex items-center justify-between group relative bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden"
-                                                        >
+                                                    {String(i + 1).padStart(2, '0')}
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Rack Slots */}
+                                        <div className="flex-1 flex flex-col-reverse relative z-10 w-full">
+                                            {Array.from({ length: dynamicU }).map((_, uIndex) => {
+                                                const uPosition = uIndex + 1
+                                                const deviceAtU = rackDevices.find(d => d.u_position === uPosition)
+
+                                                return (
+                                                    <div
+                                                        key={uIndex}
+                                                        onDragOver={(e) => e.preventDefault()}
+                                                        onDrop={() => handleDeviceDrop(uPosition)}
+                                                        className={`flex-1 min-h-[8px] border-b border-white/5 transition-all ${deviceAtU
+                                                            ? 'bg-blue-600/10'
+                                                            : 'hover:bg-white/5'
+                                                            }`}
+                                                    >
+                                                        {deviceAtU && (
+                                                            <div
+                                                                draggable
+                                                                onDragStart={() => handleDeviceDragStart(deviceAtU)}
+                                                                className="h-full px-2 flex items-center justify-between group relative bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden"
+                                                            >
                                                             <div className="flex items-center gap-1.5 flex-1 min-w-0">
                                                                 <div className={`w-1 h-1 rounded-full flex-shrink-0 ${selectedRack.estado?.toUpperCase() === 'OPERATIVO' ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
                                                                 <div className="flex flex-col min-w-0 leading-none">
@@ -423,6 +424,7 @@ export const FloorPlan = ({ assets, room, onSelectRack, selectedRackId, onSaveCh
                                 </div>
                             )
                         })()}
+                        </div>
                     </div>
 
                     {/* Stats */}

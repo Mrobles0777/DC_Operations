@@ -26,11 +26,11 @@ try {
     jsonData.forEach((row, index) => {
         if (index === 0) return; // skip header
 
-        const site   = String(row['A'] || '').trim() || 'SITIO GENERAL';
-        const room   = String(row['B'] || '').trim() || 'SALA GENERAL';
+        const site = String(row['A'] || '').trim() || 'SITIO GENERAL';
+        const room = String(row['B'] || '').trim() || 'SALA GENERAL';
         const typeRaw = String(row['C'] || '').trim().toUpperCase();
         const rackIdRaw = String(row['I'] || '').trim();
-        const marca  = String(row['E'] || '').trim();
+        const marca = String(row['E'] || '').trim();
         const modelo = String(row['F'] || '').trim();
         const serial = String(row['G'] || '').trim();
 
@@ -60,12 +60,12 @@ try {
                     // Rack was never declared with type RACK — orphan device
                     racksMap[rackKey] = { rackId: rackIdRaw, site, room, devices: [], skipped: [], orphan: true };
                 }
-                racksMap[rackKey].devices.push({ row: index+1, type: typeRaw, marca, modelo, serial });
+                racksMap[rackKey].devices.push({ row: index + 1, type: typeRaw, marca, modelo, serial });
             } else {
                 // SILENTLY DISCARDED by current logic
                 skippedNoPayload.push({ row: index + 1, rackKey, type: typeRaw });
                 if (racksMap[rackKey]) {
-                    racksMap[rackKey].skipped.push({ row: index+1, type: typeRaw });
+                    racksMap[rackKey].skipped.push({ row: index + 1, type: typeRaw });
                 }
             }
         }
@@ -95,14 +95,14 @@ try {
     });
     if (Object.keys(skippedByType).length > 0) {
         console.log('=== SKIPPED DEVICE TYPES (currently lost) ===');
-        Object.entries(skippedByType).sort((a,b) => b[1]-a[1]).forEach(([t, c]) => {
+        Object.entries(skippedByType).sort((a, b) => b[1] - a[1]).forEach(([t, c]) => {
             console.log(`  ${t.padEnd(25)} : ${c}`);
         });
         console.log('');
     }
 
     // Show top 5 racks by device count
-    const sorted = Object.values(racksMap).sort((a,b) => b.devices.length - a.devices.length);
+    const sorted = Object.values(racksMap).sort((a, b) => b.devices.length - a.devices.length);
     console.log('=== TOP 10 RACKS BY DEVICE COUNT ===');
     sorted.slice(0, 10).forEach(r => {
         const tag = `${r.rackId} (${r.site}/${r.room})`;

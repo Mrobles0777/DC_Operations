@@ -157,10 +157,9 @@ function App() {
         }, {})
 
         const getAlarmPercent = (alarmKey: keyof RackAsset) => {
-            const assetsWithData = filteredAssets.filter(r => r[alarmKey] !== undefined);
-            if (assetsWithData.length === 0) return NaN;
-            const alarmsCount = assetsWithData.filter(r => r[alarmKey] === 1).length;
-            return (alarmsCount / assetsWithData.length) * 100;
+            if (filteredAssets.length === 0) return NaN;
+            const alarmsCount = filteredAssets.filter(r => r[alarmKey] === 1).length;
+            return (alarmsCount / filteredAssets.length) * 100;
         };
 
         return {

@@ -54,7 +54,8 @@ function App() {
         confirmImport, 
         deleteAsset, 
         updateAssetDevices,
-        addAsset
+        addAsset,
+        addDeviceToRack
     } = useInventory(INITIAL_ASSETS)
 
     // UI States
@@ -266,9 +267,14 @@ function App() {
 
                     {activeTab === 'assetentry' && (
                         <AssetEntryView 
+                            assets={assets}
                             onCancel={() => setActiveTab('inventory')}
-                            onSave={(newAsset) => {
-                                addAsset(newAsset);
+                            onSave={(newAsset: any, targetRackId?: string) => {
+                                if (targetRackId) {
+                                    addDeviceToRack(targetRackId, newAsset);
+                                } else {
+                                    addAsset(newAsset as RackAsset);
+                                }
                                 setActiveTab('inventory');
                             }}
                         />

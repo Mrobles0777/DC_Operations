@@ -23,7 +23,7 @@ export const InventoryView = ({
     setShowDeleteConfirm,
     setActiveTab
 }: InventoryViewProps) => {
-    const [isDetailsOpen, setIsDetailsOpen] = useState(true);
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
     return (
         <div className="flex-1 overflow-hidden flex flex-col gap-6">
@@ -46,23 +46,23 @@ export const InventoryView = ({
                         </div>
 
                         <div className="flex flex-wrap gap-2 w-full xl:w-auto">
+                            {selectedRack && !isDetailsOpen && (
+                                <button
+                                    onClick={() => setIsDetailsOpen(true)}
+                                    className="flex-1 xl:flex-none px-4 py-2.5 bg-blue-600 text-white rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-black shadow-lg shadow-blue-200 active:scale-95 border-2 border-blue-400"
+                                >
+                                    <Layout size={16} />
+                                    VER DIGITAL TWIN
+                                </button>
+                            )}
+
                             <button
                                 onClick={() => setActiveTab('assetentry')}
-                                className="flex-1 xl:flex-none px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-black shadow-lg shadow-blue-200 active:scale-95"
+                                className="flex-1 xl:flex-none px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-xl transition-all flex items-center justify-center gap-2 text-xs font-black active:scale-95"
                             >
                                 <Plus size={16} />
                                 NUEVO
                             </button>
-                            
-                            {!isDetailsOpen && selectedRack && (
-                                <button
-                                    onClick={() => setIsDetailsOpen(true)}
-                                    className="px-4 py-2.5 bg-slate-900 text-white rounded-xl transition-all flex items-center gap-2 text-xs font-black shadow-lg active:scale-95"
-                                >
-                                    <Layout size={16} />
-                                    DETALLES
-                                </button>
-                            )}
 
                             {assets.length > 0 && (
                                 <button
@@ -94,7 +94,6 @@ export const InventoryView = ({
                                             key={asset.id}
                                             onClick={() => {
                                                 setSelectedRack(asset);
-                                                if (!isDetailsOpen) setIsDetailsOpen(true);
                                             }}
                                             className={`transition-all group cursor-pointer border-l-4 ${isSelected ? 'bg-blue-50/40 border-l-blue-600' : 'hover:bg-slate-50/80 border-l-transparent'}`}
                                         >
@@ -139,14 +138,14 @@ export const InventoryView = ({
                             animate={{ x: 0, opacity: 1, width: '65%' }}
                             exit={{ x: 300, opacity: 0, width: '0%' }}
                             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="flex flex-col h-full overflow-hidden bg-slate-50/30 rounded-3xl border border-slate-200/50 relative"
+                            className="flex flex-col h-full overflow-hidden bg-white rounded-3xl border border-slate-200 shadow-2xl relative"
                         >
                             {/* Collapse Button */}
                             <button 
                                 onClick={() => setIsDetailsOpen(false)}
-                                className="absolute top-6 -left-3 z-20 w-8 h-8 bg-white border border-slate-200 rounded-full shadow-lg flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all active:scale-90"
+                                className="absolute top-6 -left-4 z-20 w-10 h-10 bg-slate-900 text-white rounded-full shadow-xl flex items-center justify-center hover:bg-black transition-all active:scale-90"
                             >
-                                <ChevronRight size={18} />
+                                <ChevronRight size={20} />
                             </button>
 
                             {selectedRack ? (
@@ -154,7 +153,7 @@ export const InventoryView = ({
                                     <RackLayout rack={selectedRack} hideHeader={true} />
                                 </div>
                             ) : (
-                                <div className="flex-1 glass-card bg-white border-slate-200/60 flex flex-col items-center justify-center text-slate-300 m-4 border-dashed border-2 rounded-[2rem]">
+                                <div className="flex-1 bg-slate-50 flex flex-col items-center justify-center text-slate-300 m-4 border-dashed border-2 border-slate-200 rounded-[2rem]">
                                     <Box size={64} className="mb-6 opacity-10" />
                                     <p className="font-black text-xs uppercase tracking-[0.4em] text-slate-400">Seleccione un Rack</p>
                                     <p className="text-[10px] text-slate-400 uppercase mt-4 tracking-widest font-bold opacity-60">Para visualizar el digital twin y sensores</p>

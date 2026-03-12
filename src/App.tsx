@@ -283,7 +283,10 @@ function App() {
                 isOpen={isPreviewOpen}
                 onClose={() => setIsPreviewOpen(false)}
                 data={previewData}
-                onConfirm={confirmImport}
+                onConfirm={(data) => {
+                    confirmImport(data);
+                    setIsPreviewOpen(false);
+                }}
             />
 
             {/* Delete Confirmation Modal */}

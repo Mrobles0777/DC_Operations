@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Database, Map as MapIcon, Box, Activity, Zap, Search, AlertTriangle } from 'lucide-react'
+import { Database, Box, Activity, Zap, Search, AlertTriangle } from 'lucide-react'
 import { RackLayout } from '../RackLayout'
 import { RackAsset, U_TOTAL } from '../../utils/excelUtils'
 
@@ -73,62 +73,7 @@ export const DashboardView = ({
             </div>
 
             <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
-                {/* Room Breakdown */}
-                <div className="glass-card p-6 bg-white border-slate-200/60 overflow-hidden flex flex-col w-full lg:w-[25%] shadow-sm">
-                    <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                        <MapIcon className="text-blue-600" size={18} />
-                        Resumen por Sala
-                    </h3>
-                    <div className="overflow-x-auto flex-1 w-full relative">
-                        <table className="w-full text-left">
-                            <thead className="text-slate-400 text-[9px] uppercase tracking-[0.15em]">
-                                <tr className="border-b border-slate-100">
-                                    <th className="pb-3 px-2">Sala</th>
-                                    <th className="pb-3 px-2">Racks</th>
-                                    <th className="pb-3 px-2 text-right">Uso %</th>
-                                    <th className="pb-3 px-2 text-right">UR Libres</th>
-                                    <th className="pb-3 px-2 text-right">Consumo</th>
-                                    <th className="pb-3 px-2 text-right">Detalle</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50">
-                                {stats.salaBreakdown.map((sala: any) => {
-                                    const uPercent = ((sala.usedU / sala.totalU) * 100).toFixed(1)
-                                    const availU = sala.totalU - sala.usedU
-                                    return (
-                                        <tr key={sala.name} className="hover:bg-slate-50 transition-colors">
-                                            <td className="py-3 px-2 font-bold text-slate-900 text-sm">{sala.name}</td>
-                                            <td className="py-3 px-2 text-slate-500 text-xs">{sala.racks}</td>
-                                            <td className="py-3 px-2 text-right text-blue-600 font-mono font-bold text-xs">{uPercent}%</td>
-                                            <td className="py-3 px-2 text-right text-emerald-600 font-mono text-xs">{availU} UR</td>
-                                            <td className="py-3 px-2 text-right text-slate-700 font-mono text-xs">{(sala.consumption / 1000).toFixed(2)} KW</td>
-                                            <td className="py-3 px-2 text-right">
-                                                <select
-                                                    onChange={(e) => {
-                                                        const rackId = e.target.value;
-                                                        const rack = assets.find(a => a.id === rackId);
-                                                        if (rack) openRackDetail(rack);
-                                                    }}
-                                                    className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[9px] text-blue-600 font-bold outline-none cursor-pointer hover:border-blue-400/50 transition-all appearance-none pr-6 relative"
-                                                    style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'10\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%232563eb\' stroke-width=\'3\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpath d=\'m6 9 6 6 6-6\'/%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 4px center' }}
-                                                >
-                                                    <option value="">Sel...</option>
-                                                    {stats.filteredAssets.filter((a: any) => (a.sala || 'Desconocida') === sala.name).map((r: any) => (
-                                                        <option key={r.id} value={r.id}>{r.tag_id}</option>
-                                                    ))}
-                                                </select>
-                                            </td>
-                                        </tr>
-                                    )
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                {/* Capacity Monitor & Digital Twin */}
-                <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
-                    <div className="glass-card p-6 bg-white border-slate-200/60 flex-[3] flex flex-col min-h-0 shadow-sm">
+                <div className="glass-card p-6 bg-white border-slate-200/60 flex-[3] flex flex-col min-h-0 shadow-sm">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                             <div>
                                 <h3 className="text-sm font-black text-slate-900 flex items-center gap-3 uppercase tracking-[0.3em]">
@@ -272,7 +217,6 @@ export const DashboardView = ({
                                 </div>
                             )}
                         </div>
-                    </div>
                 </div>
             </div>
         </>

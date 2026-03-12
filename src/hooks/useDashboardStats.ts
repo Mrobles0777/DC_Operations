@@ -14,18 +14,6 @@ export const useDashboardStats = (assets: RackAsset[], selectedSite: string) => 
         const usagePercent = totalU > 0 ? (totalUsedU / totalU) * 100 : 0
         const freePercent = 100 - usagePercent
 
-        const salaGroups = filteredAssets.reduce((acc: Record<string, any>, r) => {
-            const sala = r.sala || 'Desconocida'
-            if (!acc[sala]) {
-                acc[sala] = { name: sala, racks: 0, usedU: 0, totalU: 0, consumption: 0 }
-            }
-            acc[sala].racks += 1
-            acc[sala].usedU += r.devices.reduce((dAcc, d) => dAcc + (d.u_height || 1), 0)
-            acc[sala].totalU += U_TOTAL
-            acc[sala].consumption += (r.consumo || 0)
-            return acc
-        }, {})
-
         const getAlarmPercent = (alarmKey: keyof RackAsset) => {
             if (filteredAssets.length === 0) return 0;
             const alarmsCount = filteredAssets.filter(r => r[alarmKey] === 1).length;
@@ -38,7 +26,6 @@ export const useDashboardStats = (assets: RackAsset[], selectedSite: string) => 
             totalConsumptionKW: totalConsumption / 1000,
             usagePercent: usagePercent.toFixed(1),
             freePercent: freePercent.toFixed(1),
-            salaBreakdown: Object.values(salaGroups),
             filteredAssets,
             alarms: {
                 hardware: getAlarmPercent('alarm_hardware'),

@@ -119,7 +119,7 @@ export const useInventory = (initialAssets: RackAsset[]) => {
                 const roomKey = `${(rack.sitio || 'GENERAL').toUpperCase()}|${(rack.sala || 'GENERAL').toUpperCase()}`;
                 const roomId = roomsMap.get(roomKey);
                 
-                const rackObj: any = {
+                return {
                     tag_id: rack.tag_id,
                     type: 'rack',
                     room_id: roomId,
@@ -138,13 +138,6 @@ export const useInventory = (initialAssets: RackAsset[]) => {
                         alarm_hdd: rack.alarm_hdd
                     }
                 };
-
-                // ONLY include ID if it's a real persistent UUID (temp IDs contain '-')
-                if (rack.id && !rack.id.includes('-')) {
-                    rackObj.id = rack.id;
-                }
-                
-                return rackObj;
             });
 
             const { data: savedRacks, error: racksError } = await supabase
@@ -165,7 +158,7 @@ export const useInventory = (initialAssets: RackAsset[]) => {
 
                 if (rack.devices) {
                     rack.devices.forEach(d => {
-                        const devObj: any = {
+                        devicesToUpsert.push({
                             parent_id: parentId,
                             room_id: roomId,
                             type: d.type,
@@ -182,14 +175,7 @@ export const useInventory = (initialAssets: RackAsset[]) => {
                                 f_instalacion: d.f_instalacion,
                                 comentarios: d.comentarios
                             }
-                        };
-
-                        // ONLY include ID if it's a real persistent UUID
-                        if (d.id && !d.id.includes('-')) {
-                            devObj.id = d.id;
-                        }
-
-                        devicesToUpsert.push(devObj);
+                        });
                     });
                 }
             });

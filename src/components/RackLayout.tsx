@@ -105,7 +105,12 @@ export const RackLayout = ({ rack, hideHeader = false, isCompact = false }: Rack
             <div className={`flex-1 flex ${isCompact ? 'flex-col items-center' : 'flex-col lg:flex-row gap-8 lg:gap-12'} ${isCompact ? 'overflow-visible' : 'overflow-hidden'} pt-2`}>
                 {/* Digital Twin Rack Engine with Isometric Perspective */}
                 <div className="flex flex-col items-center gap-6 group/rack perspective-[2000px] flex-shrink-0">
-                    {!isCompact && <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.3em] opacity-60 group-hover/rack:opacity-100 transition-opacity">Digital Twin Engine [Isometric]</p>}
+                    {!isCompact && (
+                        <div className="text-center">
+                            <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.3em] opacity-60 group-hover/rack:opacity-100 transition-opacity">Digital Twin Engine [Isometric]</p>
+                            <p className="text-2xl font-black text-slate-900 tracking-tighter uppercase font-mono mt-1">{rack.tag_id}</p>
+                        </div>
+                    )}
 
                     {/* 3D Isometric Container */}
                     <div

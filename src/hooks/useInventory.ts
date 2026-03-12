@@ -107,7 +107,7 @@ export const useInventory = (initialAssets: RackAsset[]) => {
 
             const { data: savedRooms, error: roomsError } = await supabase
                 .from('rooms')
-                .upsert(roomsToUpsert, { onConflict: 'site, name' })
+                .upsert(roomsToUpsert, { onConflict: 'site,name' })
                 .select();
 
             if (roomsError) throw roomsError;
@@ -143,7 +143,7 @@ export const useInventory = (initialAssets: RackAsset[]) => {
 
             const { data: savedRacks, error: racksError } = await supabase
                 .from('assets')
-                .upsert(racksToUpsert)
+                .upsert(racksToUpsert, { onConflict: 'tag_id' })
                 .select();
 
             if (racksError) throw racksError;
@@ -183,7 +183,7 @@ export const useInventory = (initialAssets: RackAsset[]) => {
             });
 
             if (devicesToUpsert.length > 0) {
-                const { error: deviceError } = await supabase.from('assets').upsert(devicesToUpsert);
+                const { error: deviceError } = await supabase.from('assets').upsert(devicesToUpsert, { onConflict: 'serie' });
                 if (deviceError) throw deviceError;
             }
 

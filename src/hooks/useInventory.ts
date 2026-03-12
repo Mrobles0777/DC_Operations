@@ -77,6 +77,26 @@ export const useInventory = (initialAssets: RackAsset[]) => {
         ))
     }
 
+    const addAsset = (newAsset: RackAsset) => {
+        setAssets(prev => {
+            // Check if it already exists by Tag ID and Site/Room
+            const existingIndex = prev.findIndex(a => 
+                a.tag_id.toUpperCase() === newAsset.tag_id.toUpperCase() && 
+                a.sitio?.toUpperCase() === newAsset.sitio?.toUpperCase() &&
+                a.sala?.toUpperCase() === newAsset.sala?.toUpperCase()
+            );
+
+            if (existingIndex >= 0) {
+                // Update existing
+                const updated = [...prev];
+                updated[existingIndex] = { ...updated[existingIndex], ...newAsset };
+                return updated;
+            }
+            // Add new
+            return [...prev, newAsset];
+        });
+    }
+
     return {
         assets,
         setAssets,
@@ -88,6 +108,7 @@ export const useInventory = (initialAssets: RackAsset[]) => {
         importFromExcel,
         confirmImport,
         deleteAsset,
-        updateAssetDevices
+        updateAssetDevices,
+        addAsset
     }
 }

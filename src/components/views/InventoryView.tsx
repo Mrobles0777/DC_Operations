@@ -1,4 +1,4 @@
-import { Database, Trash2, Box } from 'lucide-react'
+import { Database, Trash2, Box, Plus } from 'lucide-react'
 import { RackLayout } from '../RackLayout'
 import { RackAsset } from '../../utils/excelUtils'
 
@@ -9,6 +9,7 @@ interface InventoryViewProps {
     setShowClearAllConfirm: (show: boolean) => void
     setAssetToDelete: (asset: RackAsset | null) => void
     setShowDeleteConfirm: (show: boolean) => void
+    setActiveTab: (tab: string) => void
 }
 
 export const InventoryView = ({
@@ -17,7 +18,8 @@ export const InventoryView = ({
     setSelectedRack,
     setShowClearAllConfirm,
     setAssetToDelete,
-    setShowDeleteConfirm
+    setShowDeleteConfirm,
+    setActiveTab
 }: InventoryViewProps) => {
     return (
         <div className="flex-1 overflow-hidden flex flex-col gap-6">
@@ -28,15 +30,24 @@ export const InventoryView = ({
                             <Database className="text-blue-600" />
                             Lista de Activos
                         </h3>
-                        {assets.length > 0 && (
+                        <div className="flex gap-2">
                             <button
-                                onClick={() => setShowClearAllConfirm(true)}
-                                className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl border border-red-500/20 transition-all flex items-center gap-2 text-sm font-bold"
+                                onClick={() => setActiveTab('assetentry')}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all flex items-center gap-2 text-sm font-bold shadow-lg shadow-blue-200"
                             >
-                                <Trash2 size={16} />
-                                Borrar Todo
+                                <Plus size={16} />
+                                Carga Manual
                             </button>
-                        )}
+                            {assets.length > 0 && (
+                                <button
+                                    onClick={() => setShowClearAllConfirm(true)}
+                                    className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl border border-red-500/20 transition-all flex items-center gap-2 text-sm font-bold"
+                                >
+                                    <Trash2 size={16} />
+                                    Borrar Todo
+                                </button>
+                            )}
+                        </div>
                     </div>
                     <div className="overflow-x-auto flex-1 w-full">
                         <table className="w-full text-left min-w-[600px]">

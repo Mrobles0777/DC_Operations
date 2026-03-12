@@ -15,6 +15,7 @@ import { InventoryView } from './components/views/InventoryView'
 import { FloorPlanView } from './components/views/FloorPlanView'
 import { ImportPreviewModal } from './components/ImportPreviewModal'
 import { StatusIndicators } from './components/StatusIndicators'
+import { AssetEntryView } from './components/views/AssetEntryView'
 
 // Utils
 import { downloadTemplate, RackAsset } from './utils/excelUtils'
@@ -52,7 +53,8 @@ function App() {
         importFromExcel, 
         confirmImport, 
         deleteAsset, 
-        updateAssetDevices 
+        updateAssetDevices,
+        addAsset
     } = useInventory(INITIAL_ASSETS)
 
     // UI States
@@ -243,6 +245,7 @@ function App() {
                             setShowClearAllConfirm={setShowClearAllConfirm}
                             setAssetToDelete={setAssetToDelete}
                             setShowDeleteConfirm={setShowDeleteConfirm}
+                            setActiveTab={setActiveTab}
                         />
                     )}
 
@@ -258,6 +261,16 @@ function App() {
                             setSelectedRack={setSelectedRack}
                             dynamicRoom={dynamicRoom}
                             updateAssetDevices={updateAssetDevices}
+                        />
+                    )}
+
+                    {activeTab === 'assetentry' && (
+                        <AssetEntryView 
+                            onCancel={() => setActiveTab('inventory')}
+                            onSave={(newAsset) => {
+                                addAsset(newAsset);
+                                setActiveTab('inventory');
+                            }}
                         />
                     )}
                 </section>

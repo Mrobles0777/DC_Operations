@@ -44,8 +44,6 @@ export const InventoryView = ({
                                 <tr>
                                     <th className="pb-4 px-4">Tag ID</th>
                                     <th className="pb-4 px-4">Sitio</th>
-                                    <th className="pb-4 px-4">Fabricante</th>
-                                    <th className="pb-4 px-4">Modelo</th>
                                     <th className="pb-4 px-4">Dispositivos</th>
                                     <th className="pb-4 px-4">Acciones</th>
                                 </tr>
@@ -61,8 +59,6 @@ export const InventoryView = ({
                                         >
                                             <td className={`py-5 px-4 font-bold font-mono ${isSelected ? 'text-blue-600' : 'text-slate-900'}`}>{asset.tag_id}</td>
                                             <td className="py-5 px-4 text-slate-500 font-bold text-xs">{asset.sitio || 'N/A'}</td>
-                                            <td className="py-5 px-4 text-slate-500">{asset.fabricante}</td>
-                                            <td className="py-5 px-4 text-slate-500">{asset.modelo}</td>
                                             <td className="py-5 px-4">
                                                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${isSelected ? 'bg-blue-100 text-blue-700' : 'bg-blue-50 text-blue-600'}`}>
                                                     {asset.devices.length} Units

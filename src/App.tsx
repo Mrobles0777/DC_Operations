@@ -1,4 +1,4 @@
-import { useRef, useMemo, useState } from 'react'
+import { useRef, useMemo, useState, useEffect } from 'react'
 import { FileSpreadsheet, Download, Save, Check, Box, Menu } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -72,6 +72,11 @@ function App() {
     const [dashboardSearch, setDashboardSearch] = useState('')
     const [dashboardSort, setDashboardSort] = useState<'id' | 'usage' | 'power'>('id')
     const [dashboardSelectedRack, setDashboardSelectedRack] = useState<RackAsset | null>(null)
+
+    // Reset rack selection when site changes (ensures stats return to global site view)
+    useEffect(() => {
+        setDashboardSelectedRack(null);
+    }, [selectedSite]);
 
     const fileInputRef = useRef<HTMLInputElement>(null)
 

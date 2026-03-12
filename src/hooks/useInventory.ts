@@ -169,7 +169,7 @@ export const useInventory = (initialAssets: RackAsset[]) => {
                         const devKey = `${parentId}-${d.u_position || 0}`;
 
                         devicesMap.set(devKey, {
-                            tag_id: d.serie || devKey,
+                            tag_id: `${rack.tag_id.toUpperCase()}-U${d.u_position || 0}`,
                             parent_id: parentId,
                             room_id: roomId,
                             type: d.type,
@@ -194,8 +194,8 @@ export const useInventory = (initialAssets: RackAsset[]) => {
             const devicesToUpsert = Array.from(devicesMap.values());
 
             if (devicesToUpsert.length > 0) {
-                // Use slot-based conflict resolution (requires SQL unique index on parent_id, u_pos)
-                const { error: deviceError } = await supabase.from('assets').upsert(devicesToUpsert, { onConflict: 'parent_id,u_pos' });
+                // Use room_id,tag_id for devices as well to handle identification conflicts cleanly
+                const { error: deviceError } = await supabase.from('assets').upsert(devicesToUpsert, { onConflict: 'room_id,tag_id' });
                 if (deviceError) throw deviceError;
             }
 

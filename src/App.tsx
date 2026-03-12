@@ -20,35 +20,18 @@ import { AssetEntryView } from './components/views/AssetEntryView'
 // Utils
 import { downloadTemplate, RackAsset } from './utils/excelUtils'
 
-const INITIAL_ASSETS: RackAsset[] = [
-    {
-        id: 'rack-1',
-        tag_id: 'O-17',
-        type: 'rack',
-        pos_x: 17,
-        pos_z: 15,
-        fabricante: 'APC',
-        modelo: 'NetShelter',
-        sitio: 'SITE-01',
-        sala: 'GSM',
-        estado: 'Operativo',
-        consumo: 12.5,
-        devices: [
-            { id: 'dev-1', type: 'server', modelo: 'R740', fabricante: 'Dell', serie: 'SN-X1', u_position: 42, u_height: 1 },
-            { id: 'dev-2', type: 'switch', modelo: '2960', fabricante: 'Cisco', serie: 'SN-Y2', u_position: 1, u_height: 1 }
-        ]
-    },
-]
+const INITIAL_ASSETS: RackAsset[] = []
 
 function App() {
     // Custom Hooks
     const { user, authLoading, logout, setUser } = useAuth()
     const { 
         assets, 
-        setAssets,
         isSaving, 
+        isLoading,
         saveStatus, 
         handleSaveInventory, 
+        handleClearAllInventory,
         availableSites, 
         importFromExcel, 
         confirmImport, 
@@ -151,6 +134,16 @@ function App() {
                     <Menu size={24} />
                 </button>
             </header>
+
+            {/* Premium Loading Overlay */}
+            {isLoading && (
+                <div className="fixed inset-0 z-[100] bg-slate-900/10 backdrop-blur-md flex items-center justify-center">
+                    <div className="bg-white p-8 rounded-[2rem] shadow-2xl flex flex-col items-center gap-4 animate-in zoom-in-95 duration-300">
+                        <div className="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+                        <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-900">Sincronizando con Datacenter...</p>
+                    </div>
+                </div>
+            )}
 
             <Sidebar 
                 activeTab={activeTab}
@@ -317,8 +310,7 @@ function App() {
                             <button onClick={() => setShowClearAllConfirm(false)} className="flex-1 px-4 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-all">Conservar Datos</button>
                             <button 
                                 onClick={() => {
-                                    setAssets([]);
-                                    localStorage.removeItem('dc-inventory');
+                                    handleClearAllInventory();
                                     setShowClearAllConfirm(false);
                                 }} 
                                 className="flex-1 px-4 py-3 rounded-xl bg-slate-900 text-white font-bold hover:bg-black transition-all shadow-xl"

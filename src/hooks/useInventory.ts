@@ -2,41 +2,41 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { RackAsset, Device, parseAssetExcel } from '../utils/excelUtils'
 import { supabase } from '../lib/supabase'
 
+export interface InventoryNotification {
+    message: string;
+    type: 'success' | 'error' | 'info';
+}
+
 export const useInventory = (initialAssets: RackAsset[]) => {
     const [assets, setAssets] = useState<RackAsset[]>(initialAssets)
     const [isSaving, setIsSaving] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+    const [notification, setNotification] = useState<InventoryNotification | null>(null);
 
-    // Fetch from Supabase on mount or when user changes
+    const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+        setNotification({ message, type });
+    };
+
+    const clearNotification = () => setNotification(null);
+
+    // Fetch from Supabase on mount
     const fetchInventory = useCallback(async () => {
         setIsLoading(true);
         try {
-            // 1. Fetch Rooms
-            const { data: roomsData, error: roomsError } = await supabase
-                .from('rooms')
-                .select('*');
-
+            const { data: roomsData, error: roomsError } = await supabase.from('rooms').select('*');
             if (roomsError) throw roomsError;
 
-            // 2. Fetch Assets (Racks and Devices)
-            const { data: assetsData, error: assetsError } = await supabase
-                .from('assets')
-                .select('*');
-
+            const { data: assetsData, error: assetsError } = await supabase.from('assets').select('*').order('created_at', { ascending: true });
             if (assetsError) throw assetsError;
 
-            // 3. Map Flat Data to Hierarchical Structure
             const roomsMap = new Map();
             roomsData.forEach(r => roomsMap.set(r.id, r));
 
-            const allAssets: RackAsset[] = [];
-            
-            // First, find all Racks
             const racks = assetsData.filter(a => a.type === 'rack');
             const devices = assetsData.filter(a => a.type !== 'rack');
 
-            racks.forEach(r => {
+            const allAssets: RackAsset[] = racks.map(r => {
                 const room = roomsMap.get(r.room_id);
                 const rackDevices: Device[] = devices
                     .filter(d => d.parent_id === r.id)
@@ -52,7 +52,7 @@ export const useInventory = (initialAssets: RackAsset[]) => {
                         ...d.details
                     }));
 
-                allAssets.push({
+                return {
                     id: r.id,
                     tag_id: r.tag_id,
                     type: 'rack',
@@ -72,14 +72,12 @@ export const useInventory = (initialAssets: RackAsset[]) => {
                     alarm_fuente: r.details?.alarm_fuente || 0,
                     alarm_hdd: r.details?.alarm_hdd || 0,
                     devices: rackDevices
-                });
+                };
             });
 
-            if (allAssets.length > 0) {
-                setAssets(allAssets);
-            }
+            setAssets(allAssets);
         } catch (e) {
-            console.error("Error fetching inventory from Supabase:", e);
+            console.error("Error fetching inventory:", e);
             setSaveStatus('error');
         } finally {
             setIsLoading(false);
@@ -95,34 +93,34 @@ export const useInventory = (initialAssets: RackAsset[]) => {
         setIsSaving(true);
 
         try {
-            for (const rack of assets) {
-                // 1. Ensure Room exists
-                let roomId;
-                const { data: existingRooms } = await supabase
-                    .from('rooms')
-                    .select('id')
-                    .eq('name', rack.sala || '')
-                    .eq('site', rack.sitio || '')
-                    .limit(1);
+            // 1. Prepare and Bulk Upsert Rooms
+            const uniqueRoomKeys = new Set(assets.map(a => `${(a.sitio || 'GENERAL').toUpperCase()}|${(a.sala || 'GENERAL').toUpperCase()}`));
+            const roomsToUpsert = Array.from(uniqueRoomKeys).map(key => {
+                const [site, name] = key.split('|');
+                const asset = assets.find(a => (a.sitio || 'GENERAL').toUpperCase() === site && (a.sala || 'GENERAL').toUpperCase() === name);
+                return {
+                    site,
+                    name,
+                    floor: parseInt(asset?.piso || '1') || 1
+                };
+            });
 
-                if (existingRooms && existingRooms.length > 0) {
-                    roomId = existingRooms[0].id;
-                } else {
-                    const { data: newRoom, error: roomError } = await supabase
-                        .from('rooms')
-                        .insert({
-                            name: rack.sala || 'SALA GENERAL',
-                            site: rack.sitio || 'SITIO GENERAL',
-                            floor: parseInt(rack.piso || '1') || 1
-                        })
-                        .select()
-                        .single();
-                    if (roomError) throw roomError;
-                    roomId = newRoom.id;
-                }
+            const { data: savedRooms, error: roomsError } = await supabase
+                .from('rooms')
+                .upsert(roomsToUpsert, { onConflict: 'site, name' })
+                .select();
 
-                // 2. Upsert Rack
-                const rackData = {
+            if (roomsError) throw roomsError;
+
+            const roomsMap = new Map(savedRooms.map(r => [`${r.site.toUpperCase()}|${r.name.toUpperCase()}`, r.id]));
+
+            // 2. Prepare and Bulk Upsert Racks
+            const racksToUpsert = assets.map(rack => {
+                const roomKey = `${(rack.sitio || 'GENERAL').toUpperCase()}|${(rack.sala || 'GENERAL').toUpperCase()}`;
+                const roomId = roomsMap.get(roomKey);
+                
+                return {
+                    id: rack.id.includes('-') ? undefined : rack.id, // Only use real IDs
                     tag_id: rack.tag_id,
                     type: 'rack',
                     room_id: roomId,
@@ -141,72 +139,81 @@ export const useInventory = (initialAssets: RackAsset[]) => {
                         alarm_hdd: rack.alarm_hdd
                     }
                 };
+            });
 
-                const { data: savedRack, error: rackError } = await supabase
-                    .from('assets')
-                    .upsert({ id: rack.id.startsWith('manual-') || rack.id.startsWith('rack-') ? undefined : rack.id, ...rackData })
-                    .select()
-                    .single();
+            const { data: savedRacks, error: racksError } = await supabase
+                .from('assets')
+                .upsert(racksToUpsert)
+                .select();
 
-                if (rackError) throw rackError;
+            if (racksError) throw racksError;
 
-                // 3. Update Devices
-                if (rack.devices && rack.devices.length > 0) {
-                    const devicesToUpsert = rack.devices.map(d => ({
-                        id: d.id.startsWith('dev-') ? undefined : d.id,
-                        parent_id: savedRack.id,
-                        room_id: roomId,
-                        type: d.type,
-                        modelo: d.modelo,
-                        fabricante: d.fabricante,
-                        serie: d.serie,
-                        u_pos: d.u_position,
-                        u_height: d.u_height,
-                        watts: d.watts,
-                        details: {
-                            ip_gestion: d.ip_gestion,
-                            contrato: d.contrato,
-                            owner: d.owner,
-                            f_instalacion: d.f_instalacion,
-                            comentarios: d.comentarios
-                        }
-                    }));
+            // 3. Prepare and Bulk Upsert Devices
+            const savedRacksMap = new Map(savedRacks.map(r => [r.tag_id.toUpperCase(), r.id]));
+            const devicesToUpsert: any[] = [];
 
-                    const { error: deviceError } = await supabase
-                        .from('assets')
-                        .upsert(devicesToUpsert);
+            assets.forEach(rack => {
+                const parentId = savedRacksMap.get(rack.tag_id.toUpperCase());
+                const roomKey = `${(rack.sitio || 'GENERAL').toUpperCase()}|${(rack.sala || 'GENERAL').toUpperCase()}`;
+                const roomId = roomsMap.get(roomKey);
 
-                    if (deviceError) throw deviceError;
+                if (rack.devices) {
+                    rack.devices.forEach(d => {
+                        devicesToUpsert.push({
+                            id: d.id.includes('-') ? undefined : d.id,
+                            parent_id: parentId,
+                            room_id: roomId,
+                            type: d.type,
+                            modelo: d.modelo,
+                            fabricante: d.fabricante,
+                            serie: d.serie,
+                            u_pos: d.u_position,
+                            u_height: d.u_height,
+                            watts: d.watts,
+                            details: {
+                                ip_gestion: d.ip_gestion,
+                                contrato: d.contrato,
+                                owner: d.owner,
+                                f_instalacion: d.f_instalacion,
+                                comentarios: d.comentarios
+                            }
+                        });
+                    });
                 }
+            });
+
+            if (devicesToUpsert.length > 0) {
+                const { error: deviceError } = await supabase.from('assets').upsert(devicesToUpsert);
+                if (deviceError) throw deviceError;
             }
+
             setSaveStatus('saved');
-            // Refresh local state to get real UUIDs
-            fetchInventory();
+            showNotification(`¡Inventario sincronizado con éxito! (${assets.length} racks)`, 'success');
+            await fetchInventory();
         } catch (e) {
             console.error("Error saving to Supabase:", e);
             setSaveStatus('error');
+            showNotification('Error al sincronizar con el servidor', 'error');
         } finally {
             setTimeout(() => {
                 setSaveStatus('idle');
                 setIsSaving(false);
-            }, 3000);
+            }, 5000);
         }
     };
 
     const handleClearAllInventory = async () => {
-        if (!confirm('¿Está seguro de que desea eliminar TODO el inventario de la base de datos?')) return;
+        if (!confirm('¿CONFIRMAR ELIMINACIÓN TOTAL? Esta acción vaciará la base de datos.')) return;
         
         setIsSaving(true);
         try {
-            const { error } = await supabase
-                .from('assets')
-                .delete()
-                .neq('tag_id', 'FORCE_DELETE_ALL'); // Delete all 
-
+            const { error } = await supabase.from('assets').delete().neq('tag_id', 'FORCE_DELETE_ALL');
             if (error) throw error;
             setAssets([]);
+            showNotification('Inventario eliminado por completo', 'info');
         } catch (e) {
             console.error("Error clearing inventory:", e);
+            showNotification('Error al limpiar el inventario', 'error');
         } finally {
             setIsSaving(false);
         }
@@ -219,6 +226,9 @@ export const useInventory = (initialAssets: RackAsset[]) => {
 
     const importFromExcel = async (file: File) => {
         const data = await parseAssetExcel(file)
+        if (data && data.length > 0) {
+            showNotification(`Excel procesado: ${data.length} racks encontrados`, 'info');
+        }
         return data || []
     }
 
@@ -233,15 +243,18 @@ export const useInventory = (initialAssets: RackAsset[]) => {
             });
             return Array.from(assetMap.values());
         });
+        showNotification(`${importedRacks.length} activos listos para guardar`, 'success');
     }
 
     const deleteAsset = async (assetId: string) => {
         try {
             const { error } = await supabase.from('assets').delete().eq('id', assetId);
             if (error) throw error;
-            setAssets(prev => prev.filter(a => a.id !== assetId))
+            setAssets(prev => prev.filter(a => a.id !== assetId));
+            showNotification('Activo eliminado', 'success');
         } catch (e) {
             console.error("Error deleting asset:", e);
+            showNotification('Error al eliminar el activo', 'error');
         }
     }
 
@@ -266,6 +279,7 @@ export const useInventory = (initialAssets: RackAsset[]) => {
             }
             return [...prev, newAsset];
         });
+        showNotification('Rack añadido localmente. Presione Guardar para sincronizar.', 'info');
     }
 
     const addDeviceToRack = (rackId: string, deviceData: any) => {
@@ -285,6 +299,7 @@ export const useInventory = (initialAssets: RackAsset[]) => {
             }
             return rack;
         }));
+        showNotification('Dispositivo añadido. Presione Guardar para sincronizar.', 'info');
     }
 
     return {
@@ -293,6 +308,8 @@ export const useInventory = (initialAssets: RackAsset[]) => {
         isSaving,
         isLoading,
         saveStatus,
+        notification,
+        clearNotification,
         handleSaveInventory,
         handleClearAllInventory,
         availableSites,

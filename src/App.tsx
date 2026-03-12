@@ -1,6 +1,7 @@
-import { useRef, useMemo, useState, useEffect } from 'react'
+ import { useRef, useMemo, useState, useEffect } from 'react'
 import { FileSpreadsheet, Download, Save, Check, Box, Menu } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { NotificationToast } from './components/ui/NotificationToast'
 
 // Hooks
 import { useAuth } from './hooks/useAuth'
@@ -29,7 +30,9 @@ function App() {
         assets, 
         isSaving, 
         isLoading,
-        saveStatus, 
+        saveStatus,
+        notification,
+        clearNotification,
         handleSaveInventory, 
         handleClearAllInventory,
         availableSites, 
@@ -320,6 +323,15 @@ function App() {
                         </div>
                     </motion.div>
                 </div>
+            )}
+            {/* Notifications */}
+            {notification && (
+                <NotificationToast
+                    message={notification.message}
+                    type={notification.type}
+                    isVisible={!!notification}
+                    onClose={clearNotification}
+                />
             )}
         </div>
     )

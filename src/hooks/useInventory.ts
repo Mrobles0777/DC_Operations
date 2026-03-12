@@ -120,8 +120,10 @@ export const useInventory = (initialAssets: RackAsset[]) => {
                 const roomKey = `${(rack.sitio || 'GENERAL').toUpperCase()}|${(rack.sala || 'GENERAL').toUpperCase()}`;
                 const roomId = roomsMap.get(roomKey);
                 
-                // Deduplicate by tag_id (natural key)
-                racksMap.set(rack.tag_id.toUpperCase(), {
+                // Composite key for multi-room support: ROOM + TAG
+                const compositeKey = `${roomId}-${rack.tag_id.toUpperCase()}`;
+
+                racksMap.set(compositeKey, {
                     tag_id: rack.tag_id,
                     type: 'rack',
                     room_id: roomId,
@@ -146,26 +148,25 @@ export const useInventory = (initialAssets: RackAsset[]) => {
 
             const { data: savedRacks, error: racksError } = await supabase
                 .from('assets')
-                .upsert(racksToUpsert, { onConflict: 'tag_id' })
+                .upsert(racksToUpsert, { onConflict: 'room_id,tag_id' })
                 .select();
 
             if (racksError) throw racksError;
 
             // 3. Prepare and Bulk Upsert Devices
-            const savedRacksMap = new Map(savedRacks.map(r => [r.tag_id.toUpperCase(), r.id]));
+            const savedRacksMap = new Map(savedRacks.map(r => [`${r.room_id}-${r.tag_id.toUpperCase()}`, r.id]));
             const devicesMap = new Map();
 
             assets.forEach(rack => {
-                const parentId = savedRacksMap.get(rack.tag_id.toUpperCase());
                 const roomKey = `${(rack.sitio || 'GENERAL').toUpperCase()}|${(rack.sala || 'GENERAL').toUpperCase()}`;
                 const roomId = roomsMap.get(roomKey);
+                const parentId = savedRacksMap.get(`${roomId}-${rack.tag_id.toUpperCase()}`);
 
                 if (rack.devices) {
                     rack.devices.forEach(d => {
                         // Deduplicate by serie (natural key)
-                        // If serie is empty or "Sin Serie", we use a combined key to avoid blocking multiple generic items
                         const devKey = (!d.serie || d.serie === 'Sin Serie') 
-                            ? `NOSERIE-${rack.tag_id}-${d.u_position}-${d.modelo}`
+                            ? `NOSERIE-${parentId}-${d.u_position}-${d.modelo}`
                             : d.serie.toUpperCase();
 
                         devicesMap.set(devKey, {

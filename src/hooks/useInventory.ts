@@ -115,11 +115,13 @@ export const useInventory = (initialAssets: RackAsset[]) => {
             const roomsMap = new Map(savedRooms.map(r => [`${r.site.toUpperCase()}|${r.name.toUpperCase()}`, r.id]));
 
             // 2. Prepare and Bulk Upsert Racks
-            const racksToUpsert = assets.map(rack => {
+            const racksMap = new Map();
+            assets.forEach(rack => {
                 const roomKey = `${(rack.sitio || 'GENERAL').toUpperCase()}|${(rack.sala || 'GENERAL').toUpperCase()}`;
                 const roomId = roomsMap.get(roomKey);
                 
-                return {
+                // Deduplicate by tag_id (natural key)
+                racksMap.set(rack.tag_id.toUpperCase(), {
                     tag_id: rack.tag_id,
                     type: 'rack',
                     room_id: roomId,
@@ -137,8 +139,10 @@ export const useInventory = (initialAssets: RackAsset[]) => {
                         alarm_fuente: rack.alarm_fuente,
                         alarm_hdd: rack.alarm_hdd
                     }
-                };
+                });
             });
+
+            const racksToUpsert = Array.from(racksMap.values());
 
             const { data: savedRacks, error: racksError } = await supabase
                 .from('assets')
@@ -149,7 +153,7 @@ export const useInventory = (initialAssets: RackAsset[]) => {
 
             // 3. Prepare and Bulk Upsert Devices
             const savedRacksMap = new Map(savedRacks.map(r => [r.tag_id.toUpperCase(), r.id]));
-            const devicesToUpsert: any[] = [];
+            const devicesMap = new Map();
 
             assets.forEach(rack => {
                 const parentId = savedRacksMap.get(rack.tag_id.toUpperCase());
@@ -158,7 +162,13 @@ export const useInventory = (initialAssets: RackAsset[]) => {
 
                 if (rack.devices) {
                     rack.devices.forEach(d => {
-                        devicesToUpsert.push({
+                        // Deduplicate by serie (natural key)
+                        // If serie is empty or "Sin Serie", we use a combined key to avoid blocking multiple generic items
+                        const devKey = (!d.serie || d.serie === 'Sin Serie') 
+                            ? `NOSERIE-${rack.tag_id}-${d.u_position}-${d.modelo}`
+                            : d.serie.toUpperCase();
+
+                        devicesMap.set(devKey, {
                             parent_id: parentId,
                             room_id: roomId,
                             type: d.type,
@@ -179,6 +189,8 @@ export const useInventory = (initialAssets: RackAsset[]) => {
                     });
                 }
             });
+
+            const devicesToUpsert = Array.from(devicesMap.values());
 
             if (devicesToUpsert.length > 0) {
                 const { error: deviceError } = await supabase.from('assets').upsert(devicesToUpsert, { onConflict: 'serie' });

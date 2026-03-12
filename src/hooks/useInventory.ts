@@ -97,6 +97,24 @@ export const useInventory = (initialAssets: RackAsset[]) => {
         });
     }
 
+    const addDeviceToRack = (rackId: string, deviceData: any) => {
+        setAssets(prev => prev.map(rack => {
+            if (rack.id === rackId) {
+                const newDevice = {
+                    ...deviceData,
+                    id: `dev-${Date.now()}`,
+                    u_pos: deviceData.ur_start,
+                    u_size: deviceData.ur_height,
+                };
+                return {
+                    ...rack,
+                    devices: [...rack.devices, newDevice]
+                };
+            }
+            return rack;
+        }));
+    }
+
     return {
         assets,
         setAssets,
@@ -109,6 +127,7 @@ export const useInventory = (initialAssets: RackAsset[]) => {
         confirmImport,
         deleteAsset,
         updateAssetDevices,
-        addAsset
+        addAsset,
+        addDeviceToRack
     }
 }

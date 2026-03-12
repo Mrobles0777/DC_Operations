@@ -54,12 +54,27 @@ export const DashboardView = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {[
-                    { label: 'Total Racks', value: stats.totalRacks.toString(), icon: Box, color: 'blue' },
-                    { label: 'Consumo Total', value: `${stats.totalConsumptionKW.toFixed(2)} KW`, icon: Zap, color: 'blue' },
-                    { label: 'Ocupación Global', value: `${stats.usagePercent}%`, icon: Activity, color: 'blue' },
-                    { label: 'UR Libres Site', value: `${(stats.totalRacks * U_TOTAL - stats.filteredAssets.reduce((a: any, r: any) => a + r.devices.reduce((d: any, dv: any) => d + (dv.u_height || 1), 0), 0))} UR`, icon: Database, color: 'emerald' },
-                ].map((stat) => (
+                {(() => {
+                    const rack = dashboardSelectedRack;
+                    if (rack) {
+                        const usedU = rack.devices.reduce((acc: any, d: any) => acc + (d.u_height || 1), 0);
+                        const uPercent = ((usedU / U_TOTAL) * 100).toFixed(1);
+                        const freeU = U_TOTAL - usedU;
+
+                        return [
+                            { label: 'Rack Seleccionado', value: rack.tag_id, icon: Box, color: 'blue' },
+                            { label: 'Consumo Rack', value: `${((rack.consumo || 0) / 1000).toFixed(2)} KW`, icon: Zap, color: 'blue' },
+                            { label: 'Ocupación Rack', value: `${uPercent}%`, icon: Activity, color: 'blue' },
+                            { label: 'UR Libres Rack', value: `${freeU} UR`, icon: Database, color: 'emerald' },
+                        ];
+                    }
+                    return [
+                        { label: 'Total Racks', value: stats.totalRacks.toString(), icon: Box, color: 'blue' },
+                        { label: 'Consumo Total', value: `${stats.totalConsumptionKW.toFixed(2)} KW`, icon: Zap, color: 'blue' },
+                        { label: 'Ocupación Global', value: `${stats.usagePercent}%`, icon: Activity, color: 'blue' },
+                        { label: 'UR Libres Site', value: `${(stats.totalRacks * U_TOTAL - stats.filteredAssets.reduce((a: any, r: any) => a + r.devices.reduce((d: any, dv: any) => d + (dv.u_height || 1), 0), 0))} UR`, icon: Database, color: 'emerald' },
+                    ];
+                })().map((stat) => (
                     <div key={stat.label} className="p-6 glass-card bg-white border-slate-200/60 flex items-center gap-4">
                         <div className={`w-12 h-12 ${stat.color === 'blue' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'} rounded-xl flex items-center justify-center`}>
                             <stat.icon size={24} />

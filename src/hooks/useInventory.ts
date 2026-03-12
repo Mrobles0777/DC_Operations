@@ -169,6 +169,7 @@ export const useInventory = (initialAssets: RackAsset[]) => {
                         const devKey = `${parentId}-${d.u_position || 0}`;
 
                         devicesMap.set(devKey, {
+                            tag_id: d.serie || devKey,
                             parent_id: parentId,
                             room_id: roomId,
                             type: d.type,

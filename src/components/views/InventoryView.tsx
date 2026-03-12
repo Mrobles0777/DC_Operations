@@ -21,8 +21,8 @@ export const InventoryView = ({
 }: InventoryViewProps) => {
     return (
         <div className="flex-1 overflow-hidden flex flex-col gap-6">
-            <div className="flex flex-col lg:flex-row gap-6 min-h-0 flex-1">
-                <section className="glass-card bg-white border-slate-200/60 lg:flex-[1.5] p-4 md:p-8 overflow-hidden flex flex-col shadow-sm min-h-[400px]">
+            <div className="flex flex-col lg:flex-row gap-4 min-h-0 flex-1">
+                <section className="glass-card bg-white border-slate-200/60 w-full lg:w-[35%] p-4 overflow-hidden flex flex-col shadow-sm min-h-[400px]">
                     <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center mb-6">
                         <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
                             <Database className="text-blue-600" />
@@ -40,12 +40,12 @@ export const InventoryView = ({
                     </div>
                     <div className="overflow-x-auto flex-1 w-full">
                         <table className="w-full text-left min-w-[600px]">
-                            <thead className="bg-slate-50 text-slate-400 text-xs uppercase tracking-widest sticky top-0">
+                            <thead className="bg-slate-50 text-slate-400 text-[10px] uppercase tracking-widest sticky top-0">
                                 <tr>
-                                    <th className="pb-4 px-4">Tag ID</th>
-                                    <th className="pb-4 px-4">Sitio</th>
-                                    <th className="pb-4 px-4">Dispositivos</th>
-                                    <th className="pb-4 px-4">Acciones</th>
+                                    <th className="py-2 px-3">Tag ID</th>
+                                    <th className="py-2 px-3">Sitio</th>
+                                    <th className="py-2 px-3">Dispositivos</th>
+                                    <th className="py-2 px-3">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
@@ -55,22 +55,22 @@ export const InventoryView = ({
                                         <tr
                                             key={asset.id}
                                             onClick={() => setSelectedRack(asset)}
-                                            className={`transition-colors group cursor-pointer ${isSelected ? 'bg-blue-50 border-l-4 border-l-blue-600' : 'hover:bg-slate-50 border-l-4 border-l-transparent'}`}
+                                            className={`transition-colors group cursor-pointer ${isSelected ? 'bg-blue-50/50 border-l-4 border-l-blue-600' : 'hover:bg-slate-50 border-l-4 border-l-transparent'}`}
                                         >
-                                            <td className={`py-5 px-4 font-bold font-mono ${isSelected ? 'text-blue-600' : 'text-slate-900'}`}>{asset.tag_id}</td>
-                                            <td className="py-5 px-4 text-slate-500 font-bold text-xs">{asset.sitio || 'N/A'}</td>
-                                            <td className="py-5 px-4">
-                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${isSelected ? 'bg-blue-100 text-blue-700' : 'bg-blue-50 text-blue-600'}`}>
+                                            <td className={`py-3 px-3 font-bold font-mono text-xs ${isSelected ? 'text-blue-600' : 'text-slate-900'}`}>{asset.tag_id}</td>
+                                            <td className="py-3 px-3 text-slate-500 font-bold text-[10px]">{asset.sitio || 'N/A'}</td>
+                                            <td className="py-3 px-3">
+                                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${isSelected ? 'bg-blue-100 text-blue-700' : 'bg-blue-50 text-blue-600'}`}>
                                                     {asset.devices.length} Units
                                                 </span>
                                             </td>
-                                            <td className="py-5 px-4">
+                                            <td className="py-3 px-3">
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setAssetToDelete(asset); setShowDeleteConfirm(true); }}
-                                                        className="p-2 hover:bg-red-600/20 text-red-500 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                        className="p-1 hover:bg-red-600/20 text-red-500 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                                                     >
-                                                        <Trash2 size={18} />
+                                                        <Trash2 size={14} />
                                                     </button>
                                                 </div>
                                             </td>
@@ -82,7 +82,7 @@ export const InventoryView = ({
                     </div>
                 </section>
 
-                <div className="flex-1 flex flex-col h-full overflow-hidden">
+                <div className="lg:w-[65%] flex flex-col h-full overflow-hidden bg-slate-50/30 rounded-2xl border border-slate-200/50">
                     {selectedRack ? (
                         <div className="h-full overflow-hidden">
                             <RackLayout rack={selectedRack} hideHeader={true} />

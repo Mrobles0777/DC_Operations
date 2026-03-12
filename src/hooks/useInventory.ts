@@ -164,10 +164,9 @@ export const useInventory = (initialAssets: RackAsset[]) => {
 
                 if (rack.devices) {
                     rack.devices.forEach(d => {
-                        // Deduplicate by serie (natural key)
-                        const devKey = (!d.serie || d.serie === 'Sin Serie') 
-                            ? `NOSERIE-${parentId}-${d.u_position}-${d.modelo}`
-                            : d.serie.toUpperCase();
+                        // Deduplicate by parent rack + slot (U position)
+                        // This is more reliable than 'serie' which may contain placeholders
+                        const devKey = `${parentId}-${d.u_position || 0}`;
 
                         devicesMap.set(devKey, {
                             parent_id: parentId,
@@ -194,7 +193,8 @@ export const useInventory = (initialAssets: RackAsset[]) => {
             const devicesToUpsert = Array.from(devicesMap.values());
 
             if (devicesToUpsert.length > 0) {
-                const { error: deviceError } = await supabase.from('assets').upsert(devicesToUpsert, { onConflict: 'serie' });
+                // Use slot-based conflict resolution (requires SQL unique index on parent_id, u_pos)
+                const { error: deviceError } = await supabase.from('assets').upsert(devicesToUpsert, { onConflict: 'parent_id,u_pos' });
                 if (deviceError) throw deviceError;
             }
 
